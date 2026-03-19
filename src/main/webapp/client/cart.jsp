@@ -99,7 +99,7 @@
                                                 <%-- Các biến này giờ đã có dữ liệu từ servlet --%>
                                                 <span><fmt:formatNumber value="${subtotal}" type="currency" currencySymbol="đ" minFractionDigits="0" /></span>
                                             </div>
-                                           
+
                                             <hr>
                                             <div class="summary-row total">
                                                 <span>Tổng cộng</span>

@@ -24,7 +24,6 @@ public class ReviewServlet extends HttpServlet {
             action = "list";
         }
 
-        // Xử lý xóa riêng vì nó redirect
         if (action.equals("delete")) {
             handleDelete(request, response);
             return;
@@ -32,7 +31,7 @@ public class ReviewServlet extends HttpServlet {
 
         String url = "/admin/review.jsp";
         List<Review> reviews;
-        String viewMode; // "clean" hoặc "profane"
+        String viewMode;
 
         String productIdStr = request.getParameter("productId");
         int productId = 0;
@@ -40,7 +39,7 @@ public class ReviewServlet extends HttpServlet {
             try {
                 productId = Integer.parseInt(productIdStr);
             } catch (NumberFormatException e) {
-                productId = 0; // Reset nếu ID không hợp lệ
+                productId = 0;
             }
         }
 
@@ -51,7 +50,7 @@ public class ReviewServlet extends HttpServlet {
             } else {
                 reviews = ReviewDAO.selectProfaneReviews();
             }
-        } else { // Mặc định là action "list" (hoặc "filter")
+        } else {
             viewMode = "clean";
             if (productId > 0) {
                 reviews = ReviewDAO.selectCleanReviewsByProduct(productId);

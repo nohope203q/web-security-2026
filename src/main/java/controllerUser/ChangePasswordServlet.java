@@ -36,7 +36,6 @@ public class ChangePasswordServlet extends HttpServlet {
         String newPassword = req.getParameter("newPassword");
         String confirmPassword = req.getParameter("confirmPassword");
 
-        // 🔹 Kiểm tra nhập đủ dữ liệu
         if (oldPassword == null || newPassword == null || confirmPassword == null
                 || oldPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
             req.setAttribute("error", "Vui lòng nhập đầy đủ thông tin!");
@@ -44,7 +43,6 @@ public class ChangePasswordServlet extends HttpServlet {
             return;
         }
 
-        // 🔹 Kiểm tra trùng khớp
         if (!newPassword.equals(confirmPassword)) {
             req.setAttribute("error", "Mật khẩu mới và xác nhận không khớp!");
             req.getRequestDispatcher("/client/changePassword.jsp").forward(req, resp);
@@ -56,7 +54,6 @@ public class ChangePasswordServlet extends HttpServlet {
             return;
         }
 
-        // 🔹 Lấy lại account từ DB để đảm bảo dữ liệu mới nhất
         Account accountDB = accountDAO.findByEmail(currentAcc.getEmail());
 
         if (accountDB == null) {
@@ -65,7 +62,6 @@ public class ChangePasswordServlet extends HttpServlet {
             return;
         }
 
-        // 🔹 So sánh mật khẩu cũ (giống login logic)
         String oldHashed = data.PasswordUtil.hashPassword(oldPassword);
         if (!accountDB.getPassword().equals(oldHashed)) {
             req.setAttribute("error", "Mật khẩu hiện tại không đúng!");
@@ -75,7 +71,6 @@ public class ChangePasswordServlet extends HttpServlet {
 
         String email = (String) session.getAttribute("email");
         AccountDAO dao = new AccountDAO();
-        // 🔹 Cập nhật mật khẩu mới
         boolean ok = dao.updatePassword(accountDB.getEmail(), newPassword);
 
         if (ok) {

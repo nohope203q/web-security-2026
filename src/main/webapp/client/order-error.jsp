@@ -81,18 +81,29 @@
                 String message = "Lý do không xác định.";
                 if (errorCode != null) {
                     switch (errorCode) {
-                        case "02": message = "Giao dịch không thành công do thông tin thẻ/tài khoản không hợp lệ."; break;
-                        case "07": message = "Trừ tiền thành công. Giao dịch bị nghi ngờ (liên quan tới fraud)."; break;
-                        case "09": message = "Thẻ/Tài khoản của khách hàng chưa đăng ký dịch vụ InternetBanking tại ngân hàng."; break;
-                        case "10": message = "Thẻ/Tài khoản của khách hàng đã bị khóa."; break;
-                        case "11": message = "Khách hàng nhập sai mật khẩu xác thực giao dịch (OTP)."; break;
-                        case "24": message = "Khách hàng hủy giao dịch."; break;
-                        // Thêm các mã lỗi khác của VNPay tại đây
+                        case "02":
+                            message = "Giao dịch không thành công do thông tin thẻ/tài khoản không hợp lệ.";
+                            break;
+                        case "07":
+                            message = "Trừ tiền thành công. Giao dịch bị nghi ngờ (liên quan tới fraud).";
+                            break;
+                        case "09":
+                            message = "Thẻ/Tài khoản của khách hàng chưa đăng ký dịch vụ InternetBanking tại ngân hàng.";
+                            break;
+                        case "10":
+                            message = "Thẻ/Tài khoản của khách hàng đã bị khóa.";
+                            break;
+                        case "11":
+                            message = "Khách hàng nhập sai mật khẩu xác thực giao dịch (OTP).";
+                            break;
+                        case "24":
+                            message = "Khách hàng hủy giao dịch.";
+                            break;
                     }
                 }
             %>
             <div class="reason">
-                <p><strong>Lý do:</strong> <%= message %></p>
+                <p><strong>Lý do:</strong> <%= message%></p>
             </div>
             <div class="actions">
                 <a href="index.jsp" class="action-button">Thử lại</a>

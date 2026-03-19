@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import model.Account; // <-- Thêm import này
+import model.Account;
 import model.LineItem;
 import model.Product;
 import data.DBUtil;
@@ -25,17 +25,13 @@ public class BuyNowControl extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        // ========================================================
-        // === BƯỚC QUAN TRỌNG: KIỂM TRA NGƯỜI DÙNG ĐÃ ĐĂNG NHẬP CHƯA ===
         Account account = (Account) session.getAttribute("account");
         if (account == null) {
-            // Nếu chưa đăng nhập, chuyển hướng họ đến trang đăng nhập
-            response.sendRedirect(request.getContextPath() + "/client/login.jsp");
-            return; // Dừng servlet ngay lập tức
-        }
-        // ========================================================
 
-        // Lấy ID của sản phẩm từ URL
+            response.sendRedirect(request.getContextPath() + "/client/login.jsp");
+            return;
+        }
+
         String productIdStr = request.getParameter("pid");
         if (productIdStr == null || productIdStr.trim().isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/home");
@@ -45,7 +41,6 @@ public class BuyNowControl extends HttpServlet {
         try {
             int productId = Integer.parseInt(productIdStr);
 
-            // Lấy thông tin sản phẩm từ cơ sở dữ liệu
             EntityManager em = DBUtil.getEmFactory().createEntityManager();
             Product product;
             try {
@@ -58,21 +53,17 @@ public class BuyNowControl extends HttpServlet {
                 em.close();
             }
 
-            // Tạo một giỏ hàng tạm thời chỉ chứa sản phẩm này
             List<LineItem> buyNowCart = new ArrayList<>();
             LineItem lineItem = new LineItem();
             lineItem.setProduct(product);
             lineItem.setQuantity(1);
             buyNowCart.add(lineItem);
 
-            // Ghi đè giỏ hàng trong session
             session.setAttribute("cart", buyNowCart);
 
-            // Xóa coupon đã áp dụng trước đó (nếu có)
             session.removeAttribute("appliedCoupon");
             session.removeAttribute("discountAmount");
 
-            // Chuyển hướng người dùng thẳng đến trang thanh toán
             response.sendRedirect(request.getContextPath() + "/client/checkout.jsp");
 
         } catch (NumberFormatException e) {

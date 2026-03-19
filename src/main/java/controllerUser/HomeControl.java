@@ -33,7 +33,6 @@ public class HomeControl extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
 
-        // b1: Lấy dữ liệu từ DAO (giữ nguyên)
         ProductDAO dao = new ProductDAO();
         CategoryDAO daoC = new CategoryDAO();
         AnnouncementDAO daoAno = new AnnouncementDAO();
@@ -42,7 +41,6 @@ public class HomeControl extends HttpServlet {
         List<Announcement> listAno = daoAno.getActiveAnnouncements();
         Product last = dao.getLast();
 
-        // Lấy toàn bộ danh sách sản phẩm để phân trang
         List<Product> allProducts = dao.getAllProduct();
         String pageStr = request.getParameter("page");
         int currentPage = 1;
@@ -54,14 +52,11 @@ public class HomeControl extends HttpServlet {
             }
         }
 
-        // 2. Đặt số sản phẩm trên mỗi trang
         int productsPerPage = 8;
 
-        // 3. Tính tổng số trang
         int totalProducts = allProducts.size();
         int totalPages = (int) Math.ceil((double) totalProducts / productsPerPage);
 
-        // Đảm bảo trang hiện tại hợp lệ
         if (currentPage > totalPages && totalPages > 0) {
             currentPage = totalPages;
         } else if (currentPage < 1) {

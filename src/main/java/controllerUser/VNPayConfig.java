@@ -12,7 +12,6 @@ public class VNPayConfig {
 
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 
-    // !!! QUAN TRỌNG: SỬA LẠI "project-web" BẰNG TÊN DỰ ÁN CỦA BẠN TRÊN URL NẾU KHÁC !!!
     public static String vnp_ReturnUrl = "http://localhost:8080/project-web/client/vnpay-return";
 
     public static String vnp_TmnCode = "2UCPLFWU"; // <-- TmnCode của bạn

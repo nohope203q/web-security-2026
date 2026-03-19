@@ -7,9 +7,8 @@
         <meta charset="UTF-8">
         <title>Quản lý người dùng</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-        <link rel="stylesheet" href="<%= request.getContextPath() %>/admin/styles/main.css">
+        <link rel="stylesheet" href="<%= request.getContextPath()%>/admin/styles/main.css">
         <style>
-            /* CSS cho thanh tìm kiếm */
             .page-header {
                 display: flex;
                 justify-content: space-between;
@@ -47,33 +46,30 @@
                 background-color: #218838;
             }
             .btn-action {
-                display: inline-flex;  /* Giúp căn giữa icon */
+                display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                width: 38px;          /* Chiều rộng cố định */
-                height: 38px;         /* Chiều cao cố định */
+                width: 38px;
+                height: 38px;
 
-                background-color: #10b981; /* Màu xanh lá cây bạn muốn */
-                color: white;              /* Màu icon là màu trắng */
+                background-color: #10b981;
+                color: white;
 
-                border: none;              /* Bỏ viền */
-                border-radius: 8px;        /* Bo tròn góc */
+                border: none;
+                border-radius: 8px;
 
-                text-decoration: none;     /* Bỏ gạch chân (quan trọng cho thẻ <a>) */
+                text-decoration: none;
                 cursor: pointer;
 
-                /* Hiệu ứng chuyển động mượt mà */
                 transition: all 0.2s ease-in-out;
             }
 
-            /* Hiệu ứng khi di chuột qua */
             .btn-action:hover {
-                background-color: #059669; /* Đổi màu xanh đậm hơn */
-                transform: translateY(-2px); /* Nút nhích lên một chút */
+                background-color: #059669;
+                transform: translateY(-2px);
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             }
 
-            /* Tăng kích thước icon bên trong nút */
             .btn-action i {
                 font-size: 16px;
             }

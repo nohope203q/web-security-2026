@@ -25,10 +25,8 @@ public class UserProfileServlet extends HttpServlet {
         if (session != null && session.getAttribute("account") != null) {
             Account currentAccount = (Account) session.getAttribute("account");
 
-            // Lấy thông tin mới nhất từ DB (phòng trường hợp có update)
             currentAccount = accountDAO.findById(currentAccount.getId());
 
-            // Cập nhật lại session
             session.setAttribute("account", currentAccount);
 
             req.getRequestDispatcher("profile.jsp").forward(req, resp);
@@ -49,7 +47,6 @@ public class UserProfileServlet extends HttpServlet {
 
         Account currentAccount = (Account) session.getAttribute("account");
 
-        // Cập nhật thông tin cá nhân
         String name = req.getParameter("name");
         String email = req.getParameter("email");
         String phone = req.getParameter("phone");
@@ -58,7 +55,6 @@ public class UserProfileServlet extends HttpServlet {
         currentAccount.setEmail(email);
         currentAccount.setPhone(phone);
 
-        // Cập nhật địa chỉ
         String street = req.getParameter("street");
         String city = req.getParameter("city");
         String postalCode = req.getParameter("postalCode");
@@ -72,10 +68,8 @@ public class UserProfileServlet extends HttpServlet {
         address.setPostalCode(postalCode);
         currentAccount.setAddress(address);
 
-        // Lưu vào DB
         accountDAO.update(currentAccount);
 
-        // Cập nhật lại session
         session.setAttribute("account", currentAccount);
 
         req.setAttribute("message", "Profile updated successfully!");

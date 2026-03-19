@@ -20,8 +20,8 @@ public class LogoutServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         if (session != null) {
-            session.invalidate(); // Hủy session
+            session.invalidate();
         }
-        resp.sendRedirect(req.getContextPath() + "/home"); // Nên dùng
+        resp.sendRedirect(req.getContextPath() + "/home");
     }
 }

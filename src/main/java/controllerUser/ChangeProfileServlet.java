@@ -33,7 +33,6 @@ public class ChangeProfileServlet extends HttpServlet {
         boolean emailChanged = !newEmail.equals(currentAccount.getEmail());
 
         if (emailChanged) {
-            // Kiểm tra xem email mới đã tồn tại chưa
             Account existing = accountDAO.findByEmail(newEmail);
             if (existing != null) {
                 req.setAttribute("Lỗi!!", "Email này đã tồn tại. Vui lòng nhập email khác!");
@@ -41,14 +40,12 @@ public class ChangeProfileServlet extends HttpServlet {
                 return;
             }
 
-            // Tạo OTP
             String otp = String.format("%06d", new Random().nextInt(999999));
             session.setAttribute("otp", otp);
             session.setAttribute("pendingName", name);
             session.setAttribute("pendingPhone", phone);
             session.setAttribute("pendingEmail", newEmail);
 
-            // Gửi OTP qua email mới
             String subject = "Xác nhận OTP thay đổi email - PC SHOP";
             String body = "Mã OTP của bạn là: " + otp;
 
@@ -62,7 +59,6 @@ public class ChangeProfileServlet extends HttpServlet {
             }
 
         } else {
-            // Không đổi email → cập nhật trực tiếp
             currentAccount.setName(name);
             currentAccount.setPhone(phone);
             boolean updated = accountDAO.updateProfile(currentAccount);

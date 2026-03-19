@@ -12,7 +12,6 @@
         <div class="container">
             <h2 class="form-title">Tạo Tài Khoản</h2>
 
-            <%-- Sử dụng các class error/success đã có --%>
             <c:if test="${not empty error}">
                 <p class="error">${error}</p>
             </c:if>

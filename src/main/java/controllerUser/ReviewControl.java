@@ -30,7 +30,6 @@ public class ReviewControl extends HttpServlet {
         HttpSession session = request.getSession();
         Account account = (Account) session.getAttribute("account");
 
-        // Check if user is logged in
         if (account == null || !(account instanceof User)) {
             session.setAttribute("reviewError", "Vui lòng đăng nhập để đánh giá");
             response.sendRedirect(request.getContextPath() + "/client/login.jsp");
@@ -53,7 +52,6 @@ public class ReviewControl extends HttpServlet {
             Long productId = Long.parseLong(productIdStr);
             int rating = Integer.parseInt(ratingStr);
 
-            // Validate rating
             if (rating < 1 || rating > 5) {
                 session.setAttribute("reviewError", "Đánh giá không hợp lệ");
                 response.sendRedirect(request.getContextPath() + "/detail?pid=" + productId + "&tab=review");
@@ -69,7 +67,6 @@ public class ReviewControl extends HttpServlet {
                 return;
             }
 
-            // Check if user has already reviewed
             if (reviewDAO.hasUserReviewed(productId, user.getId())) {
                 session.setAttribute("reviewError", "Bạn đã đánh giá sản phẩm này rồi");
                 response.sendRedirect(request.getContextPath() + "/detail?pid=" + productId + "&tab=review");
@@ -77,7 +74,6 @@ public class ReviewControl extends HttpServlet {
                 return;
             }
 
-            // Get product
             Product product = productDAO.getProductById(productId);
             if (product == null) {
                 session.setAttribute("reviewError", "Không tìm thấy sản phẩm");
@@ -85,7 +81,6 @@ public class ReviewControl extends HttpServlet {
                 return;
             }
 
-            // Create review
             Review review = new Review();
             review.setRating(rating);
             review.setComment(comment != null ? comment.trim() : "");
@@ -93,7 +88,6 @@ public class ReviewControl extends HttpServlet {
             review.setUser(user);
             review.setVerified(true); // User has purchased, so mark as verified
 
-            // Save review
             boolean success = reviewDAO.insertReview(review);
 
             if (success) {

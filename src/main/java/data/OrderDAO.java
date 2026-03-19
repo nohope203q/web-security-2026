@@ -9,27 +9,21 @@ import model.Order;
 
 public class OrderDAO {
 
-    /**
-     * Thêm một đối tượng Order mới vào cơ sở dữ liệu. Bao gồm cả các OrderItem
-     * liên quan nhờ CascadeType.ALL.
-     *
-     * @param order Đối tượng Order cần lưu.
-     */
     public static void insert(Order order) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();  // ✅ tạo EntityManager
         EntityTransaction trans = em.getTransaction();                   // ✅ lấy transaction
 
         try {
-            trans.begin();                    // Bắt đầu giao dịch
-            em.persist(order);                // Lưu đối tượng Order (và các OrderItem con)
-            trans.commit();                   // Hoàn tất giao dịch
+            trans.begin();
+            em.persist(order);
+            trans.commit();
         } catch (Exception e) {
             if (trans.isActive()) {
-                trans.rollback();              // Nếu có lỗi, rollback
+                trans.rollback();
             }
             e.printStackTrace();
         } finally {
-            em.close();                        // Đóng EntityManager sau khi xong
+            em.close();
         }
     }
 
@@ -72,7 +66,6 @@ public class OrderDAO {
         }
     }
 
-    // --- Lấy 1 đơn hàng theo ID (kèm user & chi tiết sản phẩm) ---
     public static Order select(int id) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
@@ -94,24 +87,6 @@ public class OrderDAO {
         }
     }
 
-    // --- Thêm đơn hàng ---
-//    public static void insert(Order order) {
-//        EntityManager em = DBUtil.getEmFactory().createEntityManager();
-//        EntityTransaction tx = em.getTransaction();
-//        try {
-//            tx.begin();
-//            em.persist(order);
-//            tx.commit();
-//        } catch (Exception e) {
-//            if (tx.isActive()) {
-//                tx.rollback();
-//            }
-//            e.printStackTrace();
-//        } finally {
-//            em.close();
-//        }
-//    }
-    // --- Cập nhật đơn hàng ---
     public static void update(Order order) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -129,7 +104,6 @@ public class OrderDAO {
         }
     }
 
-    // --- Xóa đơn hàng ---
     public static void delete(int id) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         EntityTransaction tx = em.getTransaction();

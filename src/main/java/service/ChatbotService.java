@@ -22,7 +22,7 @@ import org.json.JSONArray;
 
 public class ChatbotService {
 
-    private static final String GEMINI_API_KEY = "AIzaSyB2weNrBEpHMD-N5F-SVxJFpyeLytHzQLk"; // 🔑 thay bằng key thật của bạn
+    private static final String GEMINI_API_KEY = "AIzaSyDuzpZW8GimfQlhxogxXm5jy2BJy8T1htg";
     private static final String GEMINI_URL
             = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + GEMINI_API_KEY;
 

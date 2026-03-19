@@ -36,11 +36,10 @@
                 overflow-y: auto;
                 padding: 15px;
                 background: #f9f9f9;
-                display: block; /* quan trọng: KHÔNG dùng flex */
+                display: block;
                 color: #000;
             }
 
-            /* Kiểu tin nhắn chung */
             .message {
                 display: inline-block;
                 margin: 8px 0;
@@ -52,14 +51,12 @@
                 clear: both;
             }
 
-            /* Tin nhắn người dùng */
             .user-message {
                 background: #007bff;
                 color: white;
                 float: right;
             }
 
-            /* Tin nhắn bot */
             .bot-message {
                 background: #e9ecef;
                 color: black;
@@ -118,7 +115,6 @@
                 const userInput = document.getElementById("user-input");
                 const sendBtn = document.getElementById("send-btn");
 
-                // ✅ Hàm hiển thị tin nhắn (có hỗ trợ markdown cơ bản)
                 function displayMessage(text, sender) {
                     console.log("📩 displayMessage được gọi với:", text, sender);
                     console.log(chatBody.innerHTML);
@@ -132,7 +128,6 @@
                     chatBody.scrollTop = chatBody.scrollHeight;
                 }
 
-                // ✅ Xử lý gửi tin nhắn
                 async function handleSendMessage() {
                     const userText = userInput.value.trim();
                     if (userText === "")
@@ -141,7 +136,6 @@
                     displayMessage(userText, "user");
                     userInput.value = "";
 
-                    // Hiển thị "Đang suy nghĩ..."
                     const typingIndicator = document.createElement("div");
                     typingIndicator.classList.add("message", "bot-message");
                     typingIndicator.innerHTML = `<span><i class="fas fa-spinner fa-pulse"></i> Đang suy nghĩ...</span>`;
@@ -149,14 +143,12 @@
                     chatBody.scrollTop = chatBody.scrollHeight;
 
                     try {
-                        // 🔗 Gửi yêu cầu đến Servlet /chat
                         const response = await fetch("chat", {
                             method: "POST",
                             headers: {"Content-Type": "application/json"},
                             body: JSON.stringify({message: userText})
                         });
 
-                        // Xóa "Đang suy nghĩ..."
                         chatBody.removeChild(typingIndicator);
 
                         if (!response.ok) {
@@ -175,10 +167,8 @@
                     }
                 }
 
-                // ✅ Gửi tin nhắn khi nhấn nút
                 sendBtn.addEventListener("click", handleSendMessage);
 
-                // ✅ Gửi khi nhấn Enter
                 userInput.addEventListener("keydown", (event) => {
                     if (event.key === "Enter") {
                         event.preventDefault();

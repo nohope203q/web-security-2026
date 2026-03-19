@@ -56,7 +56,6 @@ public class CouponDAO {
             em.close();
         }
     }
-    // Helper TX
 
     private interface Tx {
 
@@ -73,9 +72,6 @@ public class CouponDAO {
         }
     }
 
-    /**
-     * Cập nhật status theo ngày (scheduled/active/expired)
-     */
     public static void refreshStatuses() {
         LocalDate today = LocalDate.now();
         List<Coupon> all = listAll();

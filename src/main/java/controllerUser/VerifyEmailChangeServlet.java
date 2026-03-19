@@ -32,7 +32,6 @@ public class VerifyEmailChangeServlet extends HttpServlet {
             return;
         }
 
-        // Cập nhật thông tin mới
         String newName = (String) session.getAttribute("pendingName");
         String newPhone = (String) session.getAttribute("pendingPhone");
         String newEmail = (String) session.getAttribute("pendingEmail");
@@ -44,7 +43,6 @@ public class VerifyEmailChangeServlet extends HttpServlet {
         boolean updated = accountDAO.updateProfile(account);
 
         if (updated) {
-            // Cập nhật lại session
             session.setAttribute("account", account);
             session.removeAttribute("otp");
             session.removeAttribute("pendingName");

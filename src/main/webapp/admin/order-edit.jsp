@@ -6,7 +6,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Chỉnh sửa đơn hàng</title>
-        <link rel="stylesheet" href="<%= request.getContextPath() %>/admin/styles/main.css">
+        <link rel="stylesheet" href="<%= request.getContextPath()%>/admin/styles/main.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     </head>
     <body>

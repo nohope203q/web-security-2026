@@ -31,15 +31,6 @@ public class CategoryDAO {
         }
     }
 
-//    public static List<Category> getAllCategory() {
-//        EntityManager em = DBUtil.getEmFactory().createEntityManager();
-//        try {
-//            return em.createQuery("SELECT c FROM Category c", Category.class).getResultList();
-//        } finally {
-//            em.close();
-//        }
-//    }
-    // --- Lấy danh mục theo ID ---
     public static Category select(int id) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
@@ -49,7 +40,6 @@ public class CategoryDAO {
         }
     }
 
-    // --- Lấy sản phẩm theo category ID ---
     public static List<Product> getProductsByCategory(int categoryId) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
@@ -64,7 +54,6 @@ public class CategoryDAO {
         }
     }
 
-    // --- Thêm danh mục ---
     public static void insert(Category c) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -82,7 +71,6 @@ public class CategoryDAO {
         }
     }
 
-    // --- Cập nhật danh mục ---
     public static void update(Category c) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -100,7 +88,6 @@ public class CategoryDAO {
         }
     }
 
-    // --- Xóa danh mục theo ID ---
     public static void delete(int id) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         EntityTransaction tx = em.getTransaction();

@@ -44,7 +44,6 @@ public class AccountDAO {
         }
     }
 
-    // Tìm kiếm bằng ID (hữu ích sau này)
     public Account findById(long id) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {

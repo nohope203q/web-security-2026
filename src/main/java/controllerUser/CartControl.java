@@ -37,27 +37,22 @@ public class CartControl extends HttpServlet {
         List<LineItem> cart = LineItemDAO.getCartItemsByUser(user);
         session.setAttribute("cart", cart);
 
-        // === SỬA ĐỔI BẮT ĐẦU TỪ ĐÂY ===
-        // 1. Tính toán subtotal
         double subtotal = 0;
         for (LineItem item : cart) {
             subtotal += item.getTotal();
         }
 
-        // 2. Định nghĩa và tính toán các giá trị khác
-        double shippingFee = 30000.0; // Hoặc bạn có thể có logic phức tạp hơn
+        double shippingFee = 30000.0;
         if (cart.isEmpty()) {
-            shippingFee = 0; // Nếu giỏ hàng trống thì không có phí ship
+            shippingFee = 0;
         }
         double total = subtotal + shippingFee;
 
-        // 3. Gửi TẤT CẢ dữ liệu cần thiết sang JSP
-        request.setAttribute("cartItems", cart); // Dùng biến này thay vì sessionScope.cart
+        request.setAttribute("cartItems", cart);
         request.setAttribute("subtotal", subtotal);
         request.setAttribute("shippingFee", shippingFee);
         request.setAttribute("total", total);
 
-        // === KẾT THÚC SỬA ĐỔI ===
         getServletContext().getRequestDispatcher("/client/cart.jsp").forward(request, response);
     }
 
@@ -69,36 +64,29 @@ public class CartControl extends HttpServlet {
         HttpSession session = request.getSession();
         Account account = (Account) session.getAttribute("account");
 
-        // === CỔNG BẢO VỆ: YÊU CẦU ĐĂNG NHẬP ===
         if (!(account instanceof User)) {
-            // Lưu lại URL của trang hiện tại để quay lại sau khi đăng nhập thành công
             session.setAttribute("redirectAfterLogin", request.getRequestURI());
             response.sendRedirect(request.getContextPath() + "/client/login");
-            return; // Dừng thực thi
+            return;
         }
 
-        // Nếu đã đăng nhập, tiến hành xử lý giỏ hàng
         User user = (User) account;
-        List<LineItem> cart = LineItemDAO.getCartItemsByUser(user); // Luôn lấy cart mới nhất từ DB
+        List<LineItem> cart = LineItemDAO.getCartItemsByUser(user);
 
         String action = request.getParameter("action");
         if (action == null) {
             action = "cart";
         }
 
-        // Xử lý các hành động (add, update, remove) trên danh sách
         handleCartAction(request, action, cart);
 
-        // Lưu lại toàn bộ giỏ hàng đã thay đổi vào DB
         LineItemDAO.saveCart(cart, user);
-        session.setAttribute("cart", cart); // Cập nhật lại session
+        session.setAttribute("cart", cart);
 
-        // Chuyển hướng về trang trước đó
         String referer = request.getHeader("Referer");
         response.sendRedirect(referer != null ? referer : request.getContextPath() + "/home");
     }
 
-    // Hàm chung để xử lý các hành động thêm/sửa/xóa trên một List<LineItem>
     private void handleCartAction(HttpServletRequest request, String action, List<LineItem> cart) {
         try {
             long productId;

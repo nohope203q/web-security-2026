@@ -33,7 +33,6 @@ public class CategoryServlet extends HttpServlet {
         String url = "/admin/category.jsp";
         switch (action) {
             case "list" -> {
-                // Mặc định, không cần làm gì thêm
             }
             case "edit" -> {
                 try {
@@ -58,13 +57,11 @@ public class CategoryServlet extends HttpServlet {
                 }
             }
             case "delete" -> {
-                // Xử lý xóa category và redirect
                 handleDelete(request, response);
-                return; // Thoát khỏi doGet sau khi redirect
+                return;
             }
         }
 
-        // Luôn lấy danh sách categories để hiển thị trong bảng chính
         List<Category> categories = CategoryDAO.getAllCategory();
         request.setAttribute("categories", categories);
 
@@ -114,26 +111,20 @@ public class CategoryServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Xử lý xóa danh mục với ràng buộc kiểm tra sản phẩm tồn tại.
-     */
     private void handleDelete(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         try {
             int id = Integer.parseInt(request.getParameter("id"));
 
-            // --- BƯỚC QUAN TRỌNG: KIỂM TRA RÀNG BUỘC ---
-            // Chỉ xóa category khi không có sản phẩm nào thuộc về nó
             List<Product> products = CategoryDAO.getProductsByCategory(id);
 
             if (products == null || products.isEmpty()) {
-                // Nếu không có sản phẩm, tiến hành xóa
+
                 CategoryDAO.delete(id);
             } else {
-                // Nếu có sản phẩm, không xóa và gửi thông báo lỗi về cho JSP
+
                 String message = "Không thể xóa danh mục này vì nó đang chứa sản phẩm.";
 
-                // Sử dụng session để lưu message qua redirect
                 request.getSession().setAttribute("errorMessage", message);
             }
         } catch (NumberFormatException e) {
@@ -141,7 +132,6 @@ public class CategoryServlet extends HttpServlet {
             request.getSession().setAttribute("errorMessage", "ID danh mục không hợp lệ.");
         }
 
-        // Chuyển hướng người dùng trở lại trang quản lý danh mục
         response.sendRedirect(request.getContextPath() + "/admin/category");
     }
 

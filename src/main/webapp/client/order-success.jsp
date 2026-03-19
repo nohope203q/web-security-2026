@@ -25,7 +25,6 @@
                         <h3>Thông tin đơn hàng</h3>
                         <p><strong>Mã đơn hàng:</strong> #${sessionScope.latestOrder.id}</p>
 
-                        <%-- THÊM DÒNG NÀY ĐỂ HIỂN THỊ MÃ HÓA ĐƠN --%>
                         <p><strong>Mã hoá đơn:</strong> INV-${sessionScope.latestInvoice.id}</p>
 
                         <p><strong>Địa chỉ giao hàng:</strong> ${sessionScope.latestOrder.shippingAddress}</p>
@@ -35,9 +34,6 @@
 
                 <a href="${pageContext.request.contextPath}/home" class="btn btn-primary">Tiếp tục mua sắm</a>
                 <a href="${pageContext.request.contextPath}/client/order-tracking.jsp" class="btn btn-secondary">Xem đơn hàng</a>
-
-                <%-- (Nâng cao) Bạn có thể thêm nút tải hóa đơn ở đây trong tương lai --%>
-                <%-- <a href="${pageContext.request.contextPath}/client/download-invoice?id=${sessionScope.latestInvoice.id}" class="btn btn-info">Tải hoá đơn PDF</a> --%>
             </div>
         </div>
     </body>

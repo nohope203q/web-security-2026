@@ -51,10 +51,8 @@
         </div>
 
         <script>
-            // Endpoint đúng với Servlet của bạn
             const api = '<c:url value="/admin/statistic"/>';
 
-            // Khởi tạo 3 chart + title
             const revChart = new Chart(document.getElementById('rev'), {
                 type: 'line',
                 data: {labels: [], datasets: [{label: 'Doanh thu', data: [], borderColor: '#28a745', fill: false}]},
@@ -71,7 +69,6 @@
                 options: {responsive: true, plugins: {title: {display: true, text: ''}}}
             });
 
-            /* ===== Helpers: tạo nhãn ngày theo LOCAL (không dùng UTC) ===== */
             function ymdLocal(dt) {
                 var y = dt.getFullYear();
                 var m = String(dt.getMonth() + 1).padStart(2, '0');
@@ -97,26 +94,20 @@
             }
 
             async function load(params) {
-                // Gọi API
                 var url = api + '?' + new URLSearchParams(params);
                 var res = await fetch(url);
                 var data = await res.json();
-                // console.log('STATS:', data);
 
-                // Dữ liệu trả về dạng [{date:'yyyy-MM-dd', value:Number}]
                 var rev = data.revenueByDay || [];
                 var ord = data.ordersByDay || [];
                 var usr = data.newUsersByDay || [];
 
-                // Nhãn ngày liên tục theo local
                 var labels = daysRangeLocal(data.from, data.to);
 
-                // Map ngày -> giá trị để fill 0 cho ngày trống
                 var revMap = toMapObj(rev);
                 var ordMap = toMapObj(ord);
                 var usrMap = toMapObj(usr);
 
-                // Cập nhật datasets & labels
                 revChart.data.labels = labels;
                 revChart.data.datasets[0].data = labels.map(function (d) {
                     return revMap.get(d) || 0;
@@ -132,36 +123,29 @@
                     return usrMap.get(d) || 0;
                 });
 
-                // Tính tổng theo khoảng ngày (không dùng optional chaining)
                 var totals = (data && data.totals) ? data.totals : {};
                 var totalRev = (typeof totals.revenue === 'number') ? totals.revenue : Number(totals.revenue) || 0;
                 var totalOrd = parseInt(totals.orders, 10) || 0;
                 var totalUsr = parseInt(totals.users, 10) || 0;
 
-                // Cập nhật ô "Tổng doanh thu"
                 document.getElementById('totalRev').textContent = totalRev.toLocaleString('vi-VN') + ' ₫';
 
-                // Tiêu đề mỗi chart hiển thị tổng theo filter
                 revChart.options.plugins.title.text = 'Doanh thu • ' + totalRev.toLocaleString('vi-VN') + ' ₫';
                 ordChart.options.plugins.title.text = 'Đơn hàng • ' + totalOrd;
                 usrChart.options.plugins.title.text = 'Người đăng ký • ' + totalUsr;
 
-                // (tuỳ chọn) cấu hình trục Y
                 revChart.options.scales = {y: {beginAtZero: true}};
                 ordChart.options.scales = {y: {beginAtZero: true, ticks: {precision: 0}}};
                 usrChart.options.scales = {y: {beginAtZero: true, ticks: {precision: 0}}};
 
-                // Vẽ lại
                 revChart.update();
                 ordChart.update();
                 usrChart.update();
 
-                // Set lại input hiển thị
                 document.getElementById('from').value = data.from;
                 document.getElementById('to').value = data.to;
             }
 
-            // Sự kiện nút Áp dụng
             document.getElementById('apply').onclick = function () {
                 var preset = document.getElementById('preset').value;
                 var f = document.getElementById('from').value;
@@ -175,7 +159,6 @@
                     alert('Chọn preset hoặc nhập khoảng ngày!');
             };
 
-            // Tải mặc định
             load({range: 'this_month'});
         </script>
     </body>

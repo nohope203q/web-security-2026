@@ -32,14 +32,12 @@ public class SearchControl extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
 
-        // Lấy tham số từ request
         String searchKeyword = request.getParameter("txt");
         String categoryIdStr = request.getParameter("category");
         String brand = request.getParameter("brand");
         String minPriceStr = request.getParameter("minPrice");
         String maxPriceStr = request.getParameter("maxPrice");
 
-        // Parse các tham số
         Integer categoryId = null;
         Double minPrice = null;
         Double maxPrice = null;
@@ -57,35 +55,26 @@ public class SearchControl extends HttpServlet {
             System.out.println("Parse error: " + e.getMessage());
         }
 
-        // Khởi tạo DAO
         ProductDAO productDAO = new ProductDAO();
         CategoryDAO categoryDAO = new CategoryDAO();
 
-        // LOGIC QUAN TRỌNG: Xác định xem đang ở mode nào
         boolean hasSearchKeyword = searchKeyword != null && !searchKeyword.trim().isEmpty();
         boolean hasFilter = categoryId != null
                 || (brand != null && !brand.trim().isEmpty())
                 || minPrice != null
                 || maxPrice != null;
 
-        // QUY TẮC MỚI:
-        // - Nếu có filter parameters (category, brand, price) => CHỈ LỌC, KHÔNG TÌM KIẾM
-        // - Nếu chỉ có từ khóa => TÌM KIẾM
         String keywordToUse = null;
         if (hasFilter) {
-            // Đang ở chế độ lọc => KHÔNG dùng từ khóa tìm kiếm
             keywordToUse = null;
         } else if (hasSearchKeyword) {
-            // Đang ở chế độ tìm kiếm => dùng từ khóa
             keywordToUse = searchKeyword;
         }
 
-        // Lấy danh sách sản phẩm
         List<Product> filteredProducts = productDAO.searchAndFilterProducts(
                 keywordToUse, categoryId, brand, minPrice, maxPrice
         );
 
-        // PHÂN TRANG
         String pageStr = request.getParameter("page");
         int currentPage = 1;
         if (pageStr != null && !pageStr.isEmpty()) {
@@ -111,12 +100,10 @@ public class SearchControl extends HttpServlet {
 
         List<Product> paginatedProducts = filteredProducts.subList(startIndex, endIndex);
 
-        // Lấy các dữ liệu khác cho sidebar filter
         List<Category> listCC = categoryDAO.getAllCategory();
         List<String> brands = productDAO.getAllBrands();
         Map<Integer, Long> productCountByCategory = productDAO.getProductCountByCategory();
 
-        // Set dữ liệu lên request
         request.setAttribute("listP", paginatedProducts);
         request.setAttribute("listCC", listCC);
         request.setAttribute("brands", brands);
@@ -125,12 +112,10 @@ public class SearchControl extends HttpServlet {
         request.setAttribute("hasSearchKeyword", hasSearchKeyword);
         request.setAttribute("hasFilter", hasFilter);
 
-        // Gửi thông tin phân trang sang JSP
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("currentPage", currentPage);
         request.setAttribute("totalProducts", totalProducts);
 
-        // Forward tới trang search
         request.getRequestDispatcher("/client/searchPage.jsp").forward(request, response);
     }
 }

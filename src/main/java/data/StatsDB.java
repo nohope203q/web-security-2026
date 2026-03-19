@@ -15,7 +15,6 @@ public class StatsDB {
 
     private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    // === 1️⃣ Doanh thu theo ngày ===
     public static List<Map<String, Object>> revenuePerDay(LocalDate from, LocalDate to) {
         EntityManager em = em();
         List<Map<String, Object>> list = new ArrayList<>();
@@ -47,7 +46,6 @@ public class StatsDB {
         return list;
     }
 
-    // === 2️⃣ Đơn hàng theo ngày ===
     public static List<Map<String, Object>> ordersPerDay(LocalDate from, LocalDate to) {
         EntityManager em = em();
         List<Map<String, Object>> list = new ArrayList<>();
@@ -79,7 +77,6 @@ public class StatsDB {
         return list;
     }
 
-    // === 3️⃣ Người đăng ký mới theo ngày ===
     public static List<Map<String, Object>> newUsersPerDay(LocalDate from, LocalDate to) {
         EntityManager em = em();
         List<Map<String, Object>> list = new ArrayList<>();

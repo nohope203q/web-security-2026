@@ -6,9 +6,8 @@
         <meta charset="UTF-8">
         <title>${empty coupon.id ? 'Thêm' : 'Sửa'} mã giảm giá</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-        <link rel="stylesheet" href="<%= request.getContextPath() %>/admin/styles/main.css">
+        <link rel="stylesheet" href="<%= request.getContextPath()%>/admin/styles/main.css">
         <style>
-            /* Rút gọn khoảng cách cho form-card */
             .form-card {
                 gap: 10px;
                 padding: 30px 40px;

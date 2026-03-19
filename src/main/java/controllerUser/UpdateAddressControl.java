@@ -54,7 +54,6 @@ public class UpdateAddressControl extends HttpServlet {
         accountDAO.update(currentAccount);
         session.setAttribute("account", currentAccount);
 
-        // Sau khi cập nhật xong quay lại profile
         resp.sendRedirect(req.getContextPath() + "/client/profile");
     }
 }

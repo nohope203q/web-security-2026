@@ -24,14 +24,11 @@
                 </c:choose>
             </h2>
 
-            <!-- Dùng form-card để “ăn” style có sẵn -->
             <form class="form-card" action="${pageContext.request.contextPath}/admin/announcements" method="post">
-                <!-- Edit -->
                 <c:if test="${not empty announcements}">
                     <input type="hidden" name="id" value="${announcements.getId()}">
                     <input type="hidden" name="action" value="update">
                 </c:if>
-                <!-- Add -->
                 <c:if test="${empty announcements}">
                     <input type="hidden" name="action" value="insert">
                 </c:if>

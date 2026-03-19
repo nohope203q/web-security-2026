@@ -16,7 +16,6 @@ public class AnnouncementServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // --- Bổ sung kiểm tra phân quyền Admin tại đây ---
         String action = req.getParameter("action");
         if (action == null) {
             action = "list";
@@ -53,7 +52,6 @@ public class AnnouncementServlet extends HttpServlet {
         a.setTitle(req.getParameter("title"));
         a.setContent(req.getParameter("content"));
 
-        // Parse ngày CHẶT chẽ
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         sdf.setLenient(false);
 
@@ -64,13 +62,11 @@ public class AnnouncementServlet extends HttpServlet {
             end = sdf.parse(req.getParameter("endDate"));
         } catch (Exception e) {
             req.setAttribute("error", "Ngày không hợp lệ (định dạng yyyy-MM-dd).");
-            // giữ lại dữ liệu user đã nhập
             req.setAttribute("announcements", a);
             req.getRequestDispatcher("/admin/announcement_form.jsp").forward(req, resp);
             return;
         }
 
-        // ✅ VALIDATE: end phải >= start
         if (end.before(start) && end.before(today)) {
             req.setAttribute("error", "Ngày kết thúc phải ngày bắt đầu hoặc ngày kết thúc phải lớn hơn ngày hiện tại.");
             a.setStartDate(start);
@@ -111,7 +107,6 @@ public class AnnouncementServlet extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/admin/announcements");
     }
 
-    // --- Các Phương thức mới/đã sửa để đảm bảo an toàn ---
     private void handleDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String idParam = req.getParameter("id");
         if (idParam == null || idParam.trim().isEmpty()) {
@@ -121,7 +116,6 @@ public class AnnouncementServlet extends HttpServlet {
         try {
             int id = Integer.parseInt(idParam);
             AnnouncementDAO.delete(id);
-            // Có thể thêm message vào session
             resp.sendRedirect(req.getContextPath() + "/admin/announcements");
         } catch (NumberFormatException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid ID format for deletion.");

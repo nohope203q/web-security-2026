@@ -3,7 +3,7 @@ package data;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
-import model.Announcement; // Đảm bảo import đúng model Announcement
+import model.Announcement;
 import java.util.Date;
 import java.util.List;
 import model.Announcement;

@@ -2,7 +2,6 @@
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <%@ taglib uri="jakarta.tags.fmt" prefix="fmt" %>
 
-<%-- Tính toán lại tổng tiền để đảm bảo dữ liệu luôn đúng --%>
 <c:set var="cart" value="${sessionScope.cart}" />
 <c:set var="subtotal" value="0" />
 <c:forEach var="item" items="${cart}">
@@ -24,7 +23,6 @@
 
         <div class="container mt-5 mb-5">
             <div class="row">
-                <%-- Cột bên trái: Thông tin giao hàng --%>
                 <div class="col-md-7">
                     <h3>Thông tin thanh toán</h3>
                     <hr>
@@ -39,9 +37,6 @@
                             <input type="email" class="form-control" value="${sessionScope.account.email}" readonly>
                         </div>
 
-                        <%-- ================================================= --%>
-                        <%-- === PHẦN SỬA ĐỔI: LỰA CHỌN ĐỊA CHỈ GIAO HÀNG === --%>
-                        <%-- ================================================= --%>
                         <div class="mb-3">
                             <label class="form-label">Địa chỉ giao hàng</label>
 
@@ -53,7 +48,6 @@
                                 </label>
                             </div>
 
-                            <%-- Lựa chọn 2: Dùng địa chỉ mới --%>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="addressOption" id="newAddressRadio" value="new" onchange="toggleNewAddress()">
                                 <label class="form-check-label" for="newAddressRadio">
@@ -61,14 +55,11 @@
                                 </label>
                             </div>
 
-                            <%-- Ô nhập địa chỉ mới (mặc định sẽ bị ẩn) --%>
                             <div id="newAddressContainer" class="mt-2" style="display: none;">
                                 <input type="text" class="form-control" id="newAddress" name="newAddress" placeholder="Nhập địa chỉ mới chi tiết">
                             </div>
                         </div>
-                        <%-- ================= KẾT THÚC PHẦN SỬA ĐỔI ================= --%>
 
-                        <%-- Các phương thức thanh toán --%>
                         <div class="mb-3">
                             <label class="form-label">Phương thức thanh toán</label>
                             <div class="form-check">
@@ -87,14 +78,12 @@
                     </form>
                 </div>
 
-                <%-- Cột bên phải: Tóm tắt đơn hàng & Coupon --%>
                 <div class="col-md-5">
                     <div class="card shadow-sm">
                         <div class="card-body">
                             <h4 class="card-title mb-4">Đơn hàng của bạn</h4>
                             <hr>
 
-                            <%-- Form áp dụng Coupon --%>
                             <form action="${pageContext.request.contextPath}/client/apply-coupon" method="POST" class="mb-3">
                                 <label class="form-label">Mã giảm giá</label>
                                 <div class="input-group">
@@ -103,17 +92,16 @@
                                 </div>
                             </form>
 
-                            <%-- Hiển thị thông báo coupon --%>
                             <c:if test="${not empty sessionScope.couponMessage}">
                                 <div class="alert ${sessionScope.couponStatus == 'success' ? 'alert-success' : 'alert-danger'} small p-2" role="alert">
                                     ${sessionScope.couponMessage}
                                 </div>
-                                <% session.removeAttribute("couponMessage"); session.removeAttribute("couponStatus"); %>
+                                <% session.removeAttribute("couponMessage");
+                                    session.removeAttribute("couponStatus");%>
                             </c:if>
 
                             <hr>
 
-                            <%-- Chi tiết tổng tiền --%>
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item d-flex justify-content-between">
                                     <span>Tạm tính:</span>
@@ -131,7 +119,6 @@
                                 </li>
                             </ul>
 
-                            <%-- Nút Đặt Hàng (liên kết với form bên trái) --%>
                             <button type="submit" form="orderForm" class="btn btn-primary w-100 mt-4">
                                 <i class="fas fa-shopping-cart me-2"></i> ĐẶT HÀNG
                             </button>
@@ -142,19 +129,18 @@
         </div>
 
         <script>
-            // Hàm JavaScript để ẩn/hiện ô nhập địa chỉ mới
             function toggleNewAddress() {
                 var newAddressContainer = document.getElementById('newAddressContainer');
                 var newAddressRadio = document.getElementById('newAddressRadio');
                 var newAddressInput = document.getElementById('newAddress');
 
                 if (newAddressRadio.checked) {
-                    newAddressContainer.style.display = 'block'; // Hiện ra
-                    newAddressInput.setAttribute('required', 'required'); // Bắt buộc nhập
+                    newAddressContainer.style.display = 'block';
+                    newAddressInput.setAttribute('required', 'required');
                 } else {
-                    newAddressContainer.style.display = 'none'; // Ẩn đi
-                    newAddressInput.removeAttribute('required'); // Không bắt buộc nhập
-                    newAddressInput.value = ''; // Xóa giá trị cũ nếu có
+                    newAddressContainer.style.display = 'none';
+                    newAddressInput.removeAttribute('required');
+                    newAddressInput.value = '';
                 }
             }
         </script>

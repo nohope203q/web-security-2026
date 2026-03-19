@@ -11,7 +11,6 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/styles/main.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
         <style>
-            /* ... Giữ nguyên CSS của bạn ... */
             body {
                 font-family: 'Segoe UI', sans-serif;
                 background-color: #f0f2f5;

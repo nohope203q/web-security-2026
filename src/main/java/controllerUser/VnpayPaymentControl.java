@@ -33,7 +33,6 @@ public class VnpayPaymentControl extends HttpServlet {
             return;
         }
 
-        // --- Bước 1: Tạo đơn hàng với trạng thái "Chờ thanh toán" (-1) ---
         Coupon appliedCoupon = (Coupon) session.getAttribute("appliedCoupon");
         BigDecimal discountBigDecimal = (BigDecimal) session.getAttribute("discountAmount");
         Double discountAmount = (discountBigDecimal != null) ? discountBigDecimal.doubleValue() : 0.0;
@@ -51,7 +50,7 @@ public class VnpayPaymentControl extends HttpServlet {
         order.setDateOrder(new Date());
         order.setShippingAddress(shippingAddress);
         order.setPaymentMethod("VNPAY");
-        order.setStatus(-1); // -1: Chờ thanh toán VNPAY
+        order.setStatus(-1);
         order.setSubtotal(subtotal);
         order.setDiscountAmount(discountAmount);
         order.setFinalAmount(finalAmount);
@@ -85,7 +84,6 @@ public class VnpayPaymentControl extends HttpServlet {
             em.close();
         }
 
-        // --- Bước 2: Tạo URL thanh toán VNPAY ---
         String vnp_TxnRef = String.valueOf(order.getId());
         long amount = finalAmount.longValue() * 100;
         String vnp_IpAddr = VNPayConfig.getIpAddress(req);

@@ -59,7 +59,6 @@ public class CouponServlet extends HttpServlet {
         LocalDate startDate = LocalDate.parse(req.getParameter("startDate"));
         LocalDate endDate = LocalDate.parse(req.getParameter("endDate"));
 
-        // Validate
         List<String> errs = new ArrayList<>();
         if (!"PERCENT".equals(type) && !"FIXED".equals(type)) {
             errs.add("Loại mã không hợp lệ");
@@ -91,7 +90,6 @@ public class CouponServlet extends HttpServlet {
         coupon.setUsageLimit(usageLimit);
         coupon.setStartDate(startDate);
         coupon.setEndDate(endDate);
-        // status sẽ được refreshStatuses() set theo ngày
         if (coupon.getId() == null) {
             CouponDAO.insert(coupon);
         } else {

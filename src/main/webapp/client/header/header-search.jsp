@@ -14,7 +14,7 @@
 
         <style>
             body {
-                background-color: #f0f2f5; /* Màu nền sáng cho nội dung chính */
+                background-color: #f0f2f5;
             }
             .user-avatar {
                 width: 35px;
@@ -25,20 +25,18 @@
                 margin-left: 20px;
             }
             .logout-link {
-                /* Đẩy link ra xa avatar 10 pixel */
                 margin-left: 20px;
             }
             .site-header {
-                background-color: #212529; /* Màu nền Dark Mode cho toàn bộ header */
+                background-color: #212529;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             }
 
-            /* 3. Tinh chỉnh Navbar */
             .navbar .btn-primary {
-                background-color: #0d6efd; /* Giữ màu xanh dương nổi bật cho nút chính */
+                background-color: #0d6efd;
             }
             .navbar .btn-link {
-                color: #f8f9fa; /* Màu trắng cho nút "Đăng nhập" */
+                color: #f8f9fa;
                 text-decoration: none;
                 font-weight: 500;
             }

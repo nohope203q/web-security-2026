@@ -101,22 +101,19 @@
     </a>
 </div>
 
-<%-- File: /client/footer/footer.jsp --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
-<%-- Đảm bảo bạn đã thêm Font Awesome vào trang của mình để hiển thị icon --%>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"> 
 
 <footer class="site-footer">
     <div class="container">
         <div class="row">
-            <%-- Cột 1: Giới thiệu ngắn & Logo --%>
             <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
                 <h5 class="footer-heading">TechStore</h5>
                 <p class="text-muted">Nơi cung cấp các sản phẩm công nghệ chính hãng, uy tín với mức giá tốt nhất. Chúng tôi cam kết mang đến trải nghiệm mua sắm tuyệt vời cho khách hàng.</p>
             </div>
 
-            <%-- Cột 2: Các liên kết nhanh --%>
             <div class="col-lg-2 col-md-6 mb-4 mb-lg-0">
                 <h5 class="footer-heading">Khám Phá</h5>
                 <ul class="list-unstyled footer-links">
@@ -128,7 +125,6 @@
                 </ul>
             </div>
 
-            <%-- Cột 3: Chính sách & Hỗ trợ --%>
             <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
                 <h5 class="footer-heading">Hỗ Trợ Khách Hàng</h5>
                 <ul class="list-unstyled footer-links">
@@ -140,7 +136,6 @@
                 </ul>
             </div>
 
-            <%-- Cột 4: Thông tin liên hệ & Mạng xã hội --%>
             <div class="col-lg-3 col-md-6">
                 <h5 class="footer-heading">Liên Hệ</h5>
                 <ul class="list-unstyled contact-info">

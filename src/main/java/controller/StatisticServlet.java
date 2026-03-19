@@ -81,7 +81,6 @@ public class StatisticServlet extends HttpServlet {
         data.put("totals", Map.of("revenue", totalRev, "orders", totalOrd, "users", totalUsr));
 
         resp.getWriter().write(new Gson().toJson(data));
-//        RequestDispatcher dispatcher = req.getRequestDispatcher("/admin/statistic.jsp");
-//        dispatcher.forward(req, resp);
+
     }
 }

@@ -6,27 +6,24 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "orders") // Tên bảng nên là chữ thường
+@Table(name = "orders")
 public class Order implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    // --- PHẦN SỬA LỖI QUAN TRỌNG ---
-    @ManyToOne(fetch = FetchType.LAZY) // Đánh dấu mối quan hệ nhiều-một
-    @JoinColumn(name = "user_id")      // Chỉ định tên cột khóa ngoại trong bảng "orders"
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
-    // ---------------------------------
 
-    @Temporal(TemporalType.TIMESTAMP) // Giúp map kiểu Date sang TIMESTAMP trong DB
+    @Temporal(TemporalType.TIMESTAMP)
     private Date dateOrder;
 
     private int status;
     private String shippingAddress;
     private String paymentMethod;
 
-    // Một Order có thể có nhiều OrderItem
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 

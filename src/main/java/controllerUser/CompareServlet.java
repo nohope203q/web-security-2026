@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 @WebServlet("/compare")
 public class CompareServlet extends HttpServlet {
 
-    // Tối đa 2 sản phẩm để so sánh
     private static final int MAX_COMPARE = 2;
     private final ProductDAO productDAO = new ProductDAO();
 
@@ -23,7 +22,6 @@ public class CompareServlet extends HttpServlet {
         String pidStr = req.getParameter("productId");
 
         HttpSession session = req.getSession();
-        // Lưu set id trong session để không trùng và giữ thứ tự chọn
         LinkedHashSet<Integer> compareSet
                 = (LinkedHashSet<Integer>) Optional.ofNullable(session.getAttribute("compareList"))
                         .orElse(new LinkedHashSet<>());
@@ -33,7 +31,6 @@ public class CompareServlet extends HttpServlet {
                 if (pidStr != null) {
                     int id = Integer.parseInt(pidStr);
                     if (!compareSet.contains(id)) {
-                        // Nếu đủ 2 phần tử thì loại phần tử đầu (cũ nhất)
                         if (compareSet.size() >= MAX_COMPARE) {
                             Integer first = compareSet.iterator().next();
                             compareSet.remove(first);
@@ -42,7 +39,6 @@ public class CompareServlet extends HttpServlet {
                     }
                 }
                 session.setAttribute("compareList", compareSet);
-                // quay lại trang trước
                 resp.sendRedirect(req.getHeader("Referer") != null ? req.getHeader("Referer") : req.getContextPath() + "/");
                 return;
             }
@@ -62,7 +58,6 @@ public class CompareServlet extends HttpServlet {
                 return;
             }
             case "view": {
-                // Lấy danh sách Product theo các ID hiện có
                 List<Integer> ids = new ArrayList<>(compareSet);
                 List<Product> products = ids.isEmpty()
                         ? Collections.emptyList()

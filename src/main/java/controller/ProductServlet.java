@@ -18,7 +18,7 @@ public class ProductServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
-        String keyword = request.getParameter("keyword"); // 🔍 Lấy từ khóa tìm kiếm
+        String keyword = request.getParameter("keyword");
         Long id = parseLongSafe(request.getParameter("id"));
 
         EntityManager em = DBUtil.getEmFactory().createEntityManager();

@@ -12,18 +12,14 @@
     <body>
         <%@ include file="includes/sidebar.jsp" %>
 
-        <!-- Main -->
         <div class="main">
             <h1>Quản lý sản phẩm</h1>
 
-            <!-- Thanh công cụ -->
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <!-- Nút thêm -->
                 <a href="${pageContext.request.contextPath}/admin/product?action=edit" class="btn btn-primary">
                     <i class="fa-solid fa-plus"></i> Thêm sản phẩm
                 </a>
 
-                <!-- Form tìm kiếm -->
                 <form action="${pageContext.request.contextPath}/admin/product" method="get" style="display:flex; align-items:center; gap:8px;">
                     <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm..." 
                            value="${param.keyword}" 
@@ -34,7 +30,6 @@
                 </form>
             </div>
 
-            <!-- Bảng sản phẩm -->
             <table>
                 <thead>
                     <tr>

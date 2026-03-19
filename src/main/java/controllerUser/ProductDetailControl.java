@@ -44,7 +44,6 @@ public class ProductDetailControl extends HttpServlet {
             return;
         }
 
-        // (Tuỳ chọn) gợi ý sản phẩm cùng danh mục
         List<Product> related = null;
         if (product.getCategory() != null) {
             long catId = product.getCategory().getId();
@@ -64,9 +63,7 @@ public class ProductDetailControl extends HttpServlet {
 
         if (account != null && account instanceof User) {
             User user = (User) account;
-            // Check if user has purchased and received the product (status = 3)
             canReview = OrderDAO.hasUserPurchasedProduct((long) user.getId(), pid);
-            // Check if user has already reviewed
             hasReviewed = reviewDAO.hasUserReviewed(pid, user.getId());
         }
 

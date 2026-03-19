@@ -90,11 +90,9 @@ public class OrderServlet extends HttpServlet {
             order.setPaymentMethod(request.getParameter("paymentMethod"));
             order.setStatus(Integer.parseInt(request.getParameter("status")));
 
-            // Lấy danh sách item từ form
             String[] productIds = request.getParameterValues("productId");
             String[] quantities = request.getParameterValues("quantity");
 
-            // Xóa toàn bộ item cũ trước
             order.getOrderItems().clear();
 
             if (productIds != null && quantities != null) {
@@ -113,7 +111,7 @@ public class OrderServlet extends HttpServlet {
                 }
             }
 
-            OrderDAO.update(order); // Hibernate sẽ tự cascade update order_items nếu mapping có CascadeType.ALL
+            OrderDAO.update(order);
         }
 
         response.sendRedirect(request.getContextPath() + "/admin/order");

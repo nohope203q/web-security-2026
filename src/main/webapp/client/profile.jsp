@@ -12,7 +12,6 @@
     <body>
         <div class="profile-container">
 
-            <%-- ======== CỘT BÊN TRÁI (SIDEBAR) ======== --%>
             <div class="profile-sidebar">
                 <div class="profile-header">
                     <img src="https://img.pikbest.com/illustration/20250214/anime-kitten--22meow-22-font-white--26-black-fur-pink-tiny-paws-vibrant-yellow-bg_11525404.jpg!w700wp" alt="Avatar" class="profile-avatar">
@@ -23,7 +22,6 @@
                     </a>
                 </div>
 
-                <%-- Các nút hành động được chuyển vào sidebar --%>
                 <div class="profile-actions">
                     <form action="${pageContext.request.contextPath}/" method="get">
                         <button type="submit" class="btn btn-info">
@@ -43,7 +41,6 @@
                 </div>
             </div>
 
-            <%-- ======== CỘT BÊN PHẢI (NỘI DUNG CHÍNH) ======== --%>
             <div class="profile-content">
                 <div class="profile-body">
                     <div class="info-section">

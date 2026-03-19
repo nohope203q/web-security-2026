@@ -47,12 +47,6 @@ public class ProductDAO {
         }
     }
 
-    /**
-     * Lấy thông tin một sản phẩm từ database dựa vào ID.
-     *
-     * @param productId ID của sản phẩm cần tìm.
-     * @return Đối tượng Product hoặc null nếu không tìm thấy.
-     */
     public static Product getProductById(long productId) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
@@ -64,9 +58,6 @@ public class ProductDAO {
         }
     }
 
-    /**
-     * Lấy 1 sản phẩm kèm Category (JOIN FETCH) để tránh lỗi Lazy khi vào JSP.
-     */
     public Product getProductByIdWithCategory(long productId) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
@@ -85,10 +76,6 @@ public class ProductDAO {
         }
     }
 
-    /**
-     * Lấy danh sách sản phẩm liên quan cùng danh mục, loại trừ chính nó. Dùng
-     * cho phần gợi ý bên dưới trang chi tiết.
-     */
     public List<Product> getRelatedByCategory(Long categoryId, Long excludeProductId, int limit) {
         if (categoryId == null) {
             return new ArrayList<>();
@@ -121,7 +108,6 @@ public class ProductDAO {
         }
     }
 
-    // Lấy tất cả brands
     public List<String> getAllBrands() {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
@@ -143,7 +129,6 @@ public class ProductDAO {
             StringBuilder sql = new StringBuilder("SELECT p FROM Product p WHERE 1=1");
             Map<String, Object> params = new HashMap<>();
 
-            // Xử lý tìm kiếm theo từ khóa - CHỈ áp dụng khi có keyword
             if (keyword != null && !keyword.trim().isEmpty()) {
                 String[] searchTerms = keyword.trim().toLowerCase().split("\\s+");
                 sql.append(" AND (");
@@ -152,7 +137,6 @@ public class ProductDAO {
                 for (int i = 0; i < searchTerms.length; i++) {
                     String term = searchTerms[i];
                     if (!term.isEmpty()) {
-                        // Mỗi từ khóa tìm trong name, brand, description
                         orConditions.add("(LOWER(p.name) LIKE LOWER(:term" + i + ") OR "
                                 + "LOWER(p.brand) LIKE LOWER(:term" + i + ") OR "
                                 + "LOWER(p.description) LIKE LOWER(:term" + i + "))");
@@ -164,7 +148,6 @@ public class ProductDAO {
                 sql.append(")");
             }
 
-            // Các điều kiện lọc khác (LUÔN áp dụng)
             if (categoryId != null && categoryId > 0) {
                 sql.append(" AND p.category.id = :categoryId");
                 params.put("categoryId", categoryId);
@@ -185,7 +168,6 @@ public class ProductDAO {
                 params.put("maxPrice", maxPrice);
             }
 
-            // Sắp xếp mặc định
             sql.append(" ORDER BY p.name");
 
             TypedQuery<Product> query = em.createQuery(sql.toString(), Product.class);
@@ -196,7 +178,6 @@ public class ProductDAO {
 
             List<Product> results = query.getResultList();
 
-            // NẾU CÓ TỪ KHÓA, SẮP XẾP LẠI THEO ƯU TIÊN TRONG MEMORY
             if (keyword != null && !keyword.trim().isEmpty() && !results.isEmpty()) {
                 results = sortBySearchPriority(results, keyword.toLowerCase());
             }
@@ -211,7 +192,6 @@ public class ProductDAO {
         }
     }
 
-    // Phương thức sắp xếp theo ưu tiên tìm kiếm trong memory
     private List<Product> sortBySearchPriority(List<Product> products, String keyword) {
         String[] searchTerms = keyword.split("\\s+");
 
@@ -231,41 +211,36 @@ public class ProductDAO {
         String categoryLower = product.getCategory() != null ? product.getCategory().getName().toLowerCase() : "";
         String nameLower = product.getName() != null ? product.getName().toLowerCase() : "";
 
-        // Ưu tiên 1: Brand khớp chính xác
         for (String term : searchTerms) {
             if (brandLower.equals(term)) {
                 return 1;
             }
         }
 
-        // Ưu tiên 2: Brand chứa từ khóa
         for (String term : searchTerms) {
             if (brandLower.contains(term)) {
                 return 2;
             }
         }
 
-        // Ưu tiên 3: Category chứa từ khóa
         for (String term : searchTerms) {
             if (categoryLower.contains(term)) {
                 return 3;
             }
         }
 
-        // Ưu tiên 4: Name chứa từ khóa
         for (String term : searchTerms) {
             if (nameLower.contains(term)) {
                 return 4;
             }
         }
 
-        return 5; // Không khớp - ưu tiên thấp nhất
+        return 5;
     }
 
     public Map<Integer, Long> getProductCountByCategory() {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
-            // Giả sử bạn có phương thức này, nếu không có thể return empty map
             return new HashMap<>();
         } catch (Exception e) {
             e.printStackTrace();
@@ -292,17 +267,14 @@ public class ProductDAO {
     public List<Product> searchProducts(String keyword) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
-            // JPQL query để tìm kiếm
             String jpql = "SELECT p FROM Product p "
                     + "WHERE p.name LIKE :keyword "
                     + "OR p.description LIKE :keyword "
                     + "OR p.brand LIKE :keyword";
 
-            // Tạo query và set tham số
             TypedQuery<Product> query = em.createQuery(jpql, Product.class);
             query.setParameter("keyword", "%" + keyword + "%");
 
-            // Trả về kết quả
             return query.getResultList();
         } finally {
             em.close();
@@ -322,8 +294,7 @@ public class ProductDAO {
         }
     }
 
-    // --- Lấy sản phẩm theo ID ---
-    public static Product select(int id) {   // ✅ đổi Long → int
+    public static Product select(int id) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
             return em.find(Product.class, id);
@@ -332,22 +303,6 @@ public class ProductDAO {
         }
     }
 
-    // --- Thêm sản phẩm ---
-//    public static void insert(Product p) {
-//        EntityManager em = DBUtil.getEmFactory().createEntityManager();
-//        EntityTransaction tx = em.getTransaction();
-//        try {
-//            tx.begin();
-//            em.persist(p);
-//            tx.commit();
-//        } catch (Exception e) {
-//            if (tx.isActive()) tx.rollback();
-//            e.printStackTrace();
-//        } finally {
-//            em.close();
-//        }
-//    }
-    // --- Cập nhật sản phẩm ---
     public static void update(Product p) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -365,8 +320,7 @@ public class ProductDAO {
         }
     }
 
-    // --- Xóa sản phẩm theo ID ---
-    public static void delete(int id) {   // ✅ đổi Long → int
+    public static void delete(int id) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {

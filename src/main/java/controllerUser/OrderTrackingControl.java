@@ -57,7 +57,6 @@ public class OrderTrackingControl extends HttpServlet {
                 try {
                     query.setParameter("status", Integer.parseInt(statusParam));
                 } catch (NumberFormatException e) {
-                    // Bỏ qua nếu status không phải là số
                 }
             }
 

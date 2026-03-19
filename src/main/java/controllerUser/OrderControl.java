@@ -36,15 +36,12 @@ public class OrderControl extends HttpServlet {
         String paymentMethod = request.getParameter("paymentMethod");
 
         if ("VNPAY".equals(paymentMethod)) {
-            // Nếu là VNPAY, chuyển tiếp yêu cầu đến servlet tạo thanh toán VNPAY
             request.getRequestDispatcher("/client/vnpay-payment").forward(request, response);
         } else {
-            // Nếu là COD hoặc phương thức khác, xử lý như bình thường
             processCOD(request, response);
         }
     }
 
-    // Tách logic xử lý COD (và các phương thức thanh toán tại chỗ khác) ra một hàm riêng
     private void processCOD(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -68,15 +65,11 @@ public class OrderControl extends HttpServlet {
                 return;
             }
         } else {
-            // ========================================================== //
-            // === SỬA LỖI AN TOÀN KHI GHÉP ĐỊA CHỈ MẶC ĐỊNH === //
-            // ========================================================== //
+
             Address defaultAddress = account.getAddress();
 
-            // 1. Tạo một danh sách để chứa các phần của địa chỉ
             java.util.List<String> addressParts = new java.util.ArrayList<>();
 
-            // 2. Chỉ thêm các phần có giá trị (không null và không rỗng) vào danh sách
             if (defaultAddress.getStreet() != null && !defaultAddress.getStreet().trim().isEmpty()) {
                 addressParts.add(defaultAddress.getStreet());
             }
@@ -84,11 +77,9 @@ public class OrderControl extends HttpServlet {
                 addressParts.add(defaultAddress.getCity());
             }
 
-            // 3. Dùng String.join để nối các phần lại với nhau, cách này sẽ không bao giờ lỗi
             finalShippingAddress = String.join(", ", addressParts);
         }
 
-        // ... (Phần còn lại của code không thay đổi) ...
         String paymentMethod = request.getParameter("paymentMethod");
         Coupon appliedCoupon = (Coupon) session.getAttribute("appliedCoupon");
         BigDecimal discountBigDecimal = (BigDecimal) session.getAttribute("discountAmount");

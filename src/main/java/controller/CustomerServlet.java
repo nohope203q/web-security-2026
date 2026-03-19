@@ -18,15 +18,15 @@ public class CustomerServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         String action = request.getParameter("action");
         if (action == null) {
-            action = "search"; // Mặc định là hiển thị danh sách
+            action = "search";
         }
 
-        String url = "/admin/users.jsp"; // Trang mặc định
+        String url = "/admin/users.jsp";
 
         switch (action) {
             case "search":
                 listUsers(request, response);
-                return; // Dùng return vì đã forward bên trong phương thức
+                return;
             case "viewCustomer":
                 showDetail(request, response);
                 break;
@@ -56,7 +56,6 @@ public class CustomerServlet extends HttpServlet {
         getServletContext().getRequestDispatcher("/admin/users.jsp").forward(request, response);
     }
 
-    
     private void deleteUser(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
 
@@ -76,16 +75,12 @@ public class CustomerServlet extends HttpServlet {
 
         boolean ok = UserDB.deleteUserCascade(userId);
 
-        // ✅ KHÔNG ghi gì ra response trước dòng dưới
-        // chỉ redirect nếu chưa forward/in ra gì
         if (ok) {
             response.sendRedirect(request.getContextPath() + "/admin/customer");
         } else {
             request.setAttribute("error", "Không thể xóa user do lỗi ràng buộc dữ liệu.");
-            // forward tới trang báo lỗi thay vì redirect
         }
     }
-
 
     private void showDetail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

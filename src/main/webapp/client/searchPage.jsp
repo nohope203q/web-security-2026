@@ -70,7 +70,6 @@
 
         <div class="container">
             <div class="row">
-                <!-- SIDEBAR LỌC -->
                 <div class="col-lg-3 mb-4">
                     <div class="filter-sidebar">
                         <h5 class="fw-bold mb-3"><i class="fas fa-filter me-2"></i>Filters</h5>
@@ -123,7 +122,6 @@
                                     <i class="fas fa-filter me-1"></i> Apply Filters
                                 </button>
 
-                                <!-- NÚT CLEAR FILTERS -->
                                 <c:choose>
                                     <c:when test="${not empty searchKeyword}">
                                         <a href="${pageContext.request.contextPath}/client/search?txt=${searchKeyword}" 
@@ -143,7 +141,6 @@
                     </div>
                 </div>
 
-                <!-- KẾT QUẢ -->
                 <div class="col-lg-9">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
@@ -263,7 +260,6 @@
                                     </li>
                                 </c:forEach>
 
-                                <%-- Nút Next (Tiến) --%>
                                 <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
                                     <a class="page-link" href="${pageContext.request.contextPath}/client/search?page=${currentPage + 1}&txt=${fn:escapeXml(param.txt)}&category=${param.category}&brand=${fn:escapeXml(param.brand)}&minPrice=${param.minPrice}&maxPrice=${param.maxPrice}" aria-label="Next">
                                         <span aria-hidden="true">&raquo;</span>

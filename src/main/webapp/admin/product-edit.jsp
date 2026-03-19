@@ -10,7 +10,7 @@
                 <c:otherwise>Chỉnh sửa sản phẩm #${product.id}</c:otherwise>
             </c:choose>
         </title>
-        <link rel="stylesheet" href="<%= request.getContextPath() %>/admin/styles/main.css">
+        <link rel="stylesheet" href="<%= request.getContextPath()%>/admin/styles/main.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     </head>
     <body>
@@ -29,7 +29,6 @@
             </h1>
 
             <form action="${pageContext.request.contextPath}/admin/product" method="post" class="form-card">
-                <!-- Ẩn action và id -->
                 <input type="hidden" name="action" value="${empty product.id ? 'add' : 'update'}" />
                 <c:if test="${not empty product.id}">
                     <input type="hidden" name="id" value="${product.id}" />

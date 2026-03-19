@@ -126,34 +126,24 @@ public class UserDB {
         EntityTransaction trans = em.getTransaction();
         try {
             trans.begin();
-
-            // Khóa/đảm bảo bản ghi tồn tại
             User user = em.find(User.class, userId, LockModeType.PESSIMISTIC_WRITE);
             if (user == null) {
                 trans.rollback();
                 return false;
             }
 
-            // 1) XÓA CÁC BẢN GHI CON LIÊN QUAN TỚI USER
-            // --- Ví dụ: Review của user
             em.createQuery("DELETE FROM Review r WHERE r.user.id = :uid")
                     .setParameter("uid", userId)
                     .executeUpdate();
 
-            // --- Ví dụ: Invoice liên quan tới các đơn hàng của user
             em.createQuery("DELETE FROM Invoice i WHERE i.order.user.id = :uid")
                     .setParameter("uid", userId)
                     .executeUpdate();
 
-            // --- Ví dụ: Order của user
             em.createQuery("DELETE FROM Order o WHERE o.user.id = :uid")
                     .setParameter("uid", userId)
                     .executeUpdate();
 
-            // Thêm các bảng con khác nếu có:
-            // em.createQuery("DELETE FROM CartItem c WHERE c.user.id = :uid")...
-            // em.createQuery("DELETE FROM Address a WHERE a.user.id = :uid")...
-            // 2) XÓA USER
             em.remove(user);
 
             trans.commit();

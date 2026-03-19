@@ -22,10 +22,8 @@ public class VerifyOTPServlet extends HttpServlet {
         String storedOtp = (String) session.getAttribute("otp");
 
         if (storedOtp != null && storedOtp.equals(otp)) {
-            // OTP hợp lệ → chuyển sang đặt lại mật khẩu
             response.sendRedirect(request.getContextPath() + "/client/resetPassword.jsp");
         } else {
-            // OTP sai → báo lỗi
             request.setAttribute("error", "Mã OTP không hợp lệ hoặc đã hết hạn!");
             request.getRequestDispatcher("/client/verifyOTP.jsp").forward(request, response);
         }

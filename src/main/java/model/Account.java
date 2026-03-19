@@ -21,7 +21,7 @@ public abstract class Account {
 
     protected String name;
     protected String phone;
-    protected int status; // e.g., 0 for inactive, 1 for active
+    protected int status;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;

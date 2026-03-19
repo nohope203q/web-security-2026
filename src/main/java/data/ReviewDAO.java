@@ -16,9 +16,6 @@ import java.util.stream.Collectors;
 
 public class ReviewDAO {
 
-    /**
-     * Get all reviews for a specific product
-     */
     public List<Review> getReviewsByProductId(Long productId) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
@@ -39,9 +36,6 @@ public class ReviewDAO {
         }
     }
 
-    /**
-     * Get reviews by product and rating filter
-     */
     public List<Review> getReviewsByProductAndRating(Long productId, Integer rating) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
@@ -63,9 +57,6 @@ public class ReviewDAO {
         }
     }
 
-    /**
-     * Insert a new review
-     */
     public boolean insertReview(Review review) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
@@ -85,9 +76,6 @@ public class ReviewDAO {
         }
     }
 
-    /**
-     * Get average rating for a product
-     */
     public double getAverageRating(Long productId) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
@@ -106,9 +94,6 @@ public class ReviewDAO {
         }
     }
 
-    /**
-     * Get total review count for a product
-     */
     public long getTotalReviewCount(Long productId) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
@@ -126,14 +111,10 @@ public class ReviewDAO {
         }
     }
 
-    /**
-     * Get rating distribution (count for each star rating)
-     */
     public Map<Integer, Long> getRatingDistribution(Long productId) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         Map<Integer, Long> distribution = new HashMap<>();
 
-        // Initialize all ratings to 0
         for (int i = 1; i <= 5; i++) {
             distribution.put(i, 0L);
         }
@@ -163,9 +144,6 @@ public class ReviewDAO {
         }
     }
 
-    /**
-     * Check if user has already reviewed a product
-     */
     public boolean hasUserReviewed(Long productId, Long userId) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
@@ -185,9 +163,6 @@ public class ReviewDAO {
         }
     }
 
-    /**
-     * Check if user has purchased the product (for verified badge)
-     */
     public boolean hasUserPurchased(Long productId, Long userId) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
@@ -202,7 +177,6 @@ public class ReviewDAO {
             query.setParameter("userId", userId);
             return query.getSingleResult() > 0;
         } catch (Exception e) {
-            // If OrderItem entity doesn't exist or query fails, return false
             return false;
         } finally {
             em.close();
@@ -213,7 +187,6 @@ public class ReviewDAO {
             "đụ", "đéo", "đm", "cmm", "lồn", "cặc", "sv", "ml", "địt"
     );
 
-    // --- NEW: Hàm kiểm tra một bình luận có chứa từ khiếm nhã không ---
     private static boolean containsProfanity(String comment) {
         if (comment == null || comment.trim().isEmpty()) {
             return false;
@@ -227,35 +200,30 @@ public class ReviewDAO {
         return false;
     }
 
-    // --- NEW: Lấy các bình luận "sạch" (không có từ khiếm nhã) ---
     public static List<Review> selectCleanReviews() {
         return selectAll().stream()
                 .filter(r -> !containsProfanity(r.getComment()))
                 .collect(Collectors.toList());
     }
 
-    // --- NEW: Lấy các bình luận "bẩn" (có từ khiếm nhã) ---
     public static List<Review> selectProfaneReviews() {
         return selectAll().stream()
                 .filter(r -> containsProfanity(r.getComment()))
                 .collect(Collectors.toList());
     }
 
-    // --- NEW: Lọc bình luận "sạch" theo sản phẩm ---
     public static List<Review> selectCleanReviewsByProduct(int productId) {
         return selectByProduct(productId).stream()
                 .filter(r -> !containsProfanity(r.getComment()))
                 .collect(Collectors.toList());
     }
 
-    // --- NEW: Lọc bình luận "bẩn" theo sản phẩm ---
     public static List<Review> selectProfaneReviewsByProduct(int productId) {
         return selectByProduct(productId).stream()
                 .filter(r -> containsProfanity(r.getComment()))
                 .collect(Collectors.toList());
     }
 
-    // --- CÁC HÀM CŨ ĐỂ LẤY DỮ LIỆU GỐC ---
     public static List<Review> selectAll() {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         String qString = "SELECT r FROM Review r JOIN FETCH r.user JOIN FETCH r.product ORDER BY r.createdAt DESC";

@@ -28,7 +28,6 @@ public class Address {
         this.postalCode = postalCode;
     }
 
-    // Getters and Setters for attributes
     public int getId() {
         return id;
     }
@@ -69,12 +68,11 @@ public class Address {
         this.postalCode = postalCode;
     }
 
-    // Operations as per diagram
     public void updateAddress(String street, String city, String postalCode) {
         this.street = street;
         this.city = city;
         this.postalCode = postalCode;
-        // In a real application, this would also trigger a DAO update.
+
     }
 
     public String getFullAddress() {
@@ -89,13 +87,8 @@ public class Address {
 
     @Override
     public String toString() {
-        // Phương thức này sẽ chỉ ghép các phần địa chỉ có giá trị (không null).
-        // Nó sẽ tự động bỏ qua các phần bị rỗng và thêm dấu phẩy đúng chỗ.
-
-        // 1. Tạo một danh sách để chứa các phần của địa chỉ
         java.util.List<String> parts = new java.util.ArrayList<>();
 
-        // 2. Thêm từng phần vào danh sách NẾU nó không rỗng
         if (getStreet() != null && !getStreet().trim().isEmpty()) {
             parts.add(getStreet());
         }
@@ -104,7 +97,6 @@ public class Address {
             parts.add(getCity());
         }
 
-        // 3. Dùng String.join để nối các phần lại với nhau bằng dấu phẩy và dấu cách
         return String.join(", ", parts);
     }
 }
