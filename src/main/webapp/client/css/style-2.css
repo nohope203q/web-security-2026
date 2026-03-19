@@ -1,0 +1,420 @@
+/* =================================================================== */
+/* 1. GLOBAL STYLES
+/* =================================================================== */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* =================================================================== */
+/* 2. SHARED COMPONENTS (Buttons, Alerts)
+/* =================================================================== */
+
+/* --- Base Button Style --- */
+.btn, .btn-primary, .btn-secondary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-sizing: border-box;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover, .btn-primary:hover, .btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Button Colors --- */
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #0069d9;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    color: white;
+}
+.btn-info:hover {
+    background-color: #138496;
+}
+
+/* --- Alert Messages --- */
+.error, .success {
+    padding: 15px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+/* =================================================================== */
+/* 3. PROFILE PAGE LAYOUT
+/* =================================================================== */
+.profile-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 950px;
+    overflow: hidden;
+    display: flex;
+}
+
+/* --- Sidebar (Left Column) --- */
+.profile-sidebar {
+    flex: 0 0 320px;
+    background-color: #f8f9fa;
+    border-right: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-header {
+    padding: 30px 20px;
+    text-align: center;
+    position: relative;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+}
+
+.profile-header h2 {
+    margin: 10px 0 5px;
+    color: #343a40;
+    font-size: 1.8em;
+}
+.user-email {
+    color: #6c757d;
+    font-size: 1em;
+    margin-bottom: 10px;
+}
+.user-email i {
+    margin-right: 5px;
+}
+
+.logout-link {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.logout-link:hover {
+    color: #0056b3;
+}
+
+.profile-actions {
+    padding: 20px;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.profile-actions .btn {
+    width: 100%;
+}
+
+/* --- Content (Right Column) --- */
+.profile-content {
+    flex-grow: 1;
+    padding: 20px 30px;
+}
+
+.profile-body {
+    text-align: left;
+}
+
+.info-section {
+    padding-bottom: 25px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #e9ecef;
+}
+.info-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.info-section h3 {
+    color: #007bff;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+    display: flex;
+    align-items: center;
+}
+.info-section h3 i {
+    margin-right: 12px;
+    width: 20px;
+}
+.info-section p {
+    margin: 12px 0;
+    line-height: 1.6;
+    display: flex;
+}
+.label {
+    font-weight: 600;
+    color: #495057;
+    width: 120px;
+    flex-shrink: 0;
+}
+.value {
+    color: #212529;
+}
+.status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: bold;
+    color: #fff;
+}
+.status-active {
+    background-color: #28a745;
+}
+.status-inactive {
+    background-color: #6c757d;
+}
+.address-line {
+    color: #212529;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+.muted {
+    color: #888;
+    font-style: italic;
+}
+
+.btn-update-address {
+    background-color: #f1f1f1;
+    color: #333;
+    border: 1px solid #ccc;
+    display: inline-flex;
+    width: auto;
+}
+.btn-update-address:hover {
+    background-color: #e2e2e2;
+}
+
+
+/* =================================================================== */
+/* 4. FORM PAGE LAYOUT
+/* =================================================================== */
+.container {
+    background: #ffffff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 650px;
+    box-sizing: border-box;
+}
+
+.container h2 {
+    text-align: center;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 35px;
+    font-size: 1.8em;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.form-group label {
+    flex-basis: 180px; /* Chiều rộng cho label, đủ cho cả "Xác nhận mật khẩu" */
+    flex-shrink: 0;
+    font-weight: 600;
+    color: #555;
+    padding-right: 20px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] { /* Added password type */
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 1em;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus { /* Added password type */
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2);
+}
+
+.form-group p {
+    flex-basis: 100%;
+    margin-left: 180px;
+    margin-top: 5px;
+    margin-bottom: 0;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+    padding-left: 180px;
+}
+
+/* Ghi đè màu nút Hủy cho form */
+.form-actions .btn-secondary {
+    background-color: #e9ecef;
+    color: #343a40;
+    border: 1px solid #ced4da;
+}
+.form-actions .btn-secondary:hover {
+    background-color: #dae0e5;
+}
+
+
+body {
+    background-color: #f4f7f6;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px; /* Thêm padding cho màn hình nhỏ */
+    box-sizing: border-box;
+}
+
+/* --- Container chính cho form, tạo hiệu ứng "card" nổi bật --- */
+.form-container {
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    box-sizing: border-box;
+}
+
+/* --- Tiêu đề form --- */
+.form-title {
+    text-align: center;
+    color: #333;
+    font-size: 24px;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.form-subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 15px;
+    margin-bottom: 30px;
+}
+
+/* --- Nhóm các thành phần form (label + input) --- */
+.form-group {
+    margin-bottom: 20px; /* Khoảng cách giữa các mục */
+}
+
+/* --- Nhãn (Label) cho các ô nhập liệu --- */
+.form-group label {
+    display: block; /* Đưa label lên một hàng riêng */
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 8px; /* Khoảng cách từ label tới input */
+}
+
+/* --- Ô nhập liệu (Input) --- */
+.form-group input[type="text"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input[type="text"]::placeholder {
+    color: #aaa;
+}
+
+.form-group input[type="text"]:focus {
+    border-color: #007bff; /* Màu xanh dương khi focus */
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+    outline: none;
+}
+
+/* --- Nút bấm (Button) --- */
+.submit-btn {
+    width: 100%;
+    background-color: #007bff; /* Màu xanh dương chủ đạo */
+    color: #ffffff;
+    border: none;
+    padding: 14px 0;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 10px;
+}
+
+.submit-btn:hover {
+    background-color: #0056b3; /* Màu xanh dương đậm hơn khi hover */
+    transform: translateY(-2px); /* Hiệu ứng nhấc nhẹ nút bấm */
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.25);
+}
