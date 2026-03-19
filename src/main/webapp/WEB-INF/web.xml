@@ -11,10 +11,6 @@
     <welcome-file-list>
         <welcome-file>home</welcome-file>
     </welcome-file-list>
-<!--    <error-page>
-        <exception-type>java.lang.Throwable</exception-type>
-        <location>/error_java.jsp</location>
-    </error-page>-->
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>

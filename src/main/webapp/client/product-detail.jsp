@@ -102,7 +102,7 @@
         </div>
 
         <div class="d-grid gap-2">
-          <a class="btn btn-danger btn-lg" href="${cpath}/cart/add?pid=${product.id}">
+          <a class="btn btn-danger btn-lg" href="${pageContext.request.contextPath}/client/buy-now?pid=${product.id}">
             <i class="fa-solid fa-cart-plus me-2"></i>MUA NGAY
           </a>
           <a class="btn btn-outline-primary" href="${cpath}/">Về trang chủ</a>
