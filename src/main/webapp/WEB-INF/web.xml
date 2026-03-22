@@ -5,7 +5,6 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          metadata-complete="false">
 
-    <!-- ==================== ADMIN ==================== -->
     <servlet>
         <servlet-name>AdminServlet</servlet-name>
         <servlet-class>controller.AdminServlet</servlet-class>
@@ -78,7 +77,6 @@
         <url-pattern>/admin/statistic</url-pattern>
     </servlet-mapping>
 
-    <!-- ==================== CLIENT ==================== -->
     <servlet>
         <servlet-name>HomeControl</servlet-name>
         <servlet-class>controllerUser.HomeControl</servlet-class>
@@ -258,6 +256,15 @@
         <servlet-name>CompareServlet</servlet-name>
         <url-pattern>/compare</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>ChatServlet</servlet-name>
+        <servlet-class>controllerUser.ChatServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ChatServlet</servlet-name>
+        <url-pattern>/client/chat</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>ReviewControl</servlet-name>
@@ -266,15 +273,6 @@
     <servlet-mapping>
         <servlet-name>ReviewControl</servlet-name>
         <url-pattern>/review</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>ChatServlet</servlet-name>
-        <servlet-class>controllerUser.ChatServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ChatServlet</servlet-name>
-        <url-pattern>/client/chat</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -294,7 +292,7 @@
         <servlet-name>VnpayReturnControl</servlet-name>
         <url-pattern>/client/vnpay-return</url-pattern>
     </servlet-mapping>
-
+    
     <welcome-file-list>
         <welcome-file>home</welcome-file>
     </welcome-file-list>

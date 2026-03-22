@@ -7,10 +7,9 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import model.Announcement;
@@ -22,17 +21,43 @@ import org.json.JSONArray;
 
 public class ChatbotService {
 
-    private static final String GEMINI_API_KEY = "AIzaSyDuzpZW8GimfQlhxogxXm5jy2BJy8T1htg";
-    private static final String GEMINI_URL
-            = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + GEMINI_API_KEY;
+    private static final String GROQ_API_KEY = loadApiKey();
+    private static final String GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+    private static final String GROQ_MODEL = "llama-3.3-70b-versatile"; // Đổi model tại đây nếu cần
 
     private final List<ChatMessage> conversationHistory = new ArrayList<>();
 
+    private static String loadApiKey() {
+        try (InputStream is = ChatbotService.class.getClassLoader()
+                .getResourceAsStream("config.properties")) {
+            if (is == null) {
+                throw new RuntimeException(
+                    "Không tìm thấy file config.properties. " +
+                    "Hãy tạo file src/main/resources/config.properties với nội dung: " +
+                    "groq.api.key=YOUR_KEY_HERE"
+                );
+            }
+            Properties props = new Properties();
+            props.load(is);
+            String key = props.getProperty("groq.api.key");
+            if (key == null || key.isBlank()) {
+                throw new RuntimeException("groq.api.key chưa được cấu hình trong config.properties");
+            }
+            return key.trim();
+        } catch (IOException e) {
+            throw new RuntimeException("Không đọc được API key: " + e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------
+    // Gửi tin nhắn và trả về phản hồi AI
+    // -------------------------------------------------------
     public String sendMessage(int userId, String content) {
         ChatConversation conversation = new ChatConversation(1, userId);
         ChatMessage userMsg = new ChatMessage(1, conversation.getId(), "user", content);
         conversation.addMessage(userMsg);
         conversationHistory.add(userMsg);
+
         String dbContext = findRelevantProductInfo(content);
         String announcementContext = findRelevantAnnouncements(content);
         String fullDbContext = Stream.of(dbContext, announcementContext)
@@ -45,38 +70,41 @@ public class ChatbotService {
         conversation.addMessage(aiMsg);
         conversationHistory.add(aiMsg);
 
-        return aiReplyContent; // Trả về String để Servlet có thể dùng ngay
+        return aiReplyContent;
     }
 
+    // -------------------------------------------------------
+    // Xây dựng payload theo chuẩn OpenAI và gọi Groq
+    // -------------------------------------------------------
     private String callAIAPI(String contextFromDB) {
         try {
             String baseContext = loadChatContext();
-            JSONObject payload = new JSONObject();
-            JSONArray contents = new JSONArray();
-
-            // Thêm lịch sử trò chuyện vào payload
-            for (ChatMessage msg : conversationHistory) {
-                JSONObject messageContent = new JSONObject();
-                messageContent.put("role", msg.getSender()); // "user" hoặc "model"
-                messageContent.put("parts", new JSONArray().put(new JSONObject().put("text", msg.getContent())));
-                contents.put(messageContent);
-            }
-
-            payload.put("contents", contents);
-
-            // Xây dựng system_instruction: Kết hợp context mặc định và context từ DB
-            JSONObject systemInstruction = new JSONObject();
-            JSONArray parts = new JSONArray();
             String fullContext = baseContext;
             if (contextFromDB != null && !contextFromDB.isEmpty()) {
                 fullContext += "\n\n" + contextFromDB;
             }
-            parts.put(new JSONObject().put("text", fullContext));
-            systemInstruction.put("parts", parts);
 
-            payload.put("system_instruction", systemInstruction);
+            JSONArray messages = new JSONArray();
 
-            return callGeminiAPI(payload.toString());
+            // System message (context + DB info)
+            messages.put(new JSONObject()
+                    .put("role", "system")
+                    .put("content", fullContext));
+
+            for (ChatMessage msg : conversationHistory) {
+                String role = msg.getSender().equals("model") ? "assistant" : msg.getSender();
+                messages.put(new JSONObject()
+                        .put("role", role)
+                        .put("content", msg.getContent()));
+            }
+
+            JSONObject payload = new JSONObject();
+            payload.put("model", GROQ_MODEL);
+            payload.put("messages", messages);
+            payload.put("max_tokens", 1024);
+            payload.put("temperature", 0.7);
+
+            return callGroqAPI(payload.toString());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -84,32 +112,58 @@ public class ChatbotService {
         }
     }
 
-    private String callGeminiAPI(String jsonPayload) throws IOException {
-        URL url = new URL(GEMINI_URL);
+    private String callGroqAPI(String jsonPayload) throws IOException {
+        URL url = new URL(GROQ_URL);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json; utf-8");
+        conn.setRequestProperty("Authorization", "Bearer " + GROQ_API_KEY);
         conn.setDoOutput(true);
 
         try (OutputStream os = conn.getOutputStream()) {
-            byte[] input = jsonPayload.getBytes(StandardCharsets.UTF_8);
-            os.write(input, 0, input.length);
+            os.write(jsonPayload.getBytes(StandardCharsets.UTF_8));
         }
 
         int responseCode = conn.getResponseCode();
-        InputStream inputStream = (responseCode >= 200 && responseCode < 300) ? conn.getInputStream() : conn.getErrorStream();
+        InputStream inputStream = (responseCode >= 200 && responseCode < 300)
+                ? conn.getInputStream()
+                : conn.getErrorStream();
 
         StringBuilder response = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            String responseLine;
-            while ((responseLine = br.readLine()) != null) {
-                response.append(responseLine.trim());
-            }
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = br.readLine()) != null) response.append(line.trim());
         }
         conn.disconnect();
 
-        return parseGeminiReply(response.toString());
+        return parseGroqReply(response.toString());
     }
+
+    private String parseGroqReply(String jsonResponse) {
+        try {
+            JSONObject responseObject = new JSONObject(jsonResponse);
+
+            if (responseObject.has("error")) {
+                String errorMessage = responseObject.getJSONObject("error").getString("message");
+                return "❌ Groq API báo lỗi: " + errorMessage;
+            }
+
+            JSONArray choices = responseObject.getJSONArray("choices");
+            if (choices.length() > 0) {
+                return choices.getJSONObject(0)
+                        .getJSONObject("message")
+                        .getString("content");
+            }
+
+            return "🤖 Không tìm thấy nội dung trả lời trong response.";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "🤖 Lỗi khi đọc phản hồi từ Groq: " + jsonResponse;
+        }
+    }
+
 
     private String loadChatContext() {
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("chat_context.txt")) {
@@ -117,12 +171,11 @@ public class ChatbotService {
                 System.err.println("Không tìm thấy file chat_context.txt, dùng context mặc định.");
                 return getDefaultContext();
             }
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(is, StandardCharsets.UTF_8))) {
                 StringBuilder sb = new StringBuilder();
                 String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line).append("\n");
-                }
+                while ((line = reader.readLine()) != null) sb.append(line).append("\n");
                 return sb.toString().trim();
             }
         } catch (IOException e) {
@@ -132,70 +185,37 @@ public class ChatbotService {
     }
 
     private String getDefaultContext() {
-        return "Bạn là một trợ lý ảo tư vấn bán hàng cho một cửa hàng công nghệ. Hãy trả lời câu hỏi của khách hàng một cách ngắn gọn, thân thiện và chuyên nghiệp.";
+        return "Bạn là một trợ lý ảo tư vấn bán hàng cho một cửa hàng công nghệ. " +
+               "Hãy trả lời câu hỏi của khách hàng một cách ngắn gọn, thân thiện và chuyên nghiệp.";
     }
 
-    private String parseGeminiReply(String jsonResponse) {
-        try {
-            JSONObject responseObject = new JSONObject(jsonResponse);
-
-            if (responseObject.has("error")) {
-                String errorMessage = responseObject.getJSONObject("error").getString("message");
-                return "❌ API Gemini báo lỗi: " + errorMessage;
-            }
-
-            JSONArray candidates = responseObject.getJSONArray("candidates");
-            if (candidates.length() > 0) {
-                JSONObject content = candidates.getJSONObject(0).getJSONObject("content");
-                JSONArray parts = content.getJSONArray("parts");
-                if (parts.length() > 0) {
-                    return parts.getJSONObject(0).getString("text");
-                }
-            }
-            return "🤖 Không tìm thấy nội dung trả lời trong response.";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "🤖 Lỗi khi đọc phản hồi từ Gemini: " + jsonResponse;
-        }
-    }
-
-    public void clearConversation() {
-        conversationHistory.clear();
-    }
-
-    // Bên trong file ChatbotService.java
     private String findRelevantProductInfo(String userMessage) {
-        // Phần tách keyword vẫn giữ nguyên
-
         String[] keywords = userMessage.split("\\s+");
         List<Product> relevantProducts = new ArrayList<>();
         ProductDAO productDAO = new ProductDAO();
+
         for (String keyword : keywords) {
-            if (keyword.length() > 2 && !keyword.equalsIgnoreCase("giá") && !keyword.equalsIgnoreCase("bao nhiêu")) {
+            if (keyword.length() > 2
+                    && !keyword.equalsIgnoreCase("giá")
+                    && !keyword.equalsIgnoreCase("bao nhiêu")) {
                 List<Product> found = productDAO.searchProducts(keyword);
-                if (found != null) {
-                    relevantProducts.addAll(found);
-                }
+                if (found != null) relevantProducts.addAll(found);
             }
         }
 
-        // Loại bỏ các sản phẩm trùng lặp bằng hàm equals/hashCode đã tạo ở Product.java
         List<Product> distinctProducts = relevantProducts.stream()
                 .distinct()
                 .collect(Collectors.toList());
 
-        if (distinctProducts.isEmpty()) {
-            return ""; // Không tìm thấy sản phẩm nào
-        }
+        if (distinctProducts.isEmpty()) return "";
 
-        // ✅ ĐỊNH DẠNG LẠI CONTEXT: Cung cấp nhiều thông tin hơn cho AI
         StringBuilder contextBuilder = new StringBuilder();
         contextBuilder.append("Dưới đây là thông tin sản phẩm từ CSDL có thể liên quan, hãy dựa vào đây để trả lời:\n\n");
         for (Product p : distinctProducts) {
             contextBuilder.append("---")
                     .append("\nTên sản phẩm: ").append(p.getName())
                     .append("\nThương hiệu: ").append(p.getBrand())
-                    .append("\nGiá bán: ").append(p.getPrice()) // Dùng hàm định dạng tiền
+                    .append("\nGiá bán: ").append(p.getPrice())
                     .append("\nSố lượng còn lại: ").append(p.getQuantity())
                     .append("\nMô tả ngắn: ").append(p.getDescription()).append("\n\n");
         }
@@ -203,32 +223,25 @@ public class ChatbotService {
     }
 
     private String findRelevantAnnouncements(String userMessage) {
-        // Tách câu hỏi của người dùng thành từng từ khóa
         String[] keywords = userMessage.toLowerCase().split("\\s+");
         List<Announcement> relevantAnnouncements = new ArrayList<>();
-
         AnnouncementDAO announcementDAO = new AnnouncementDAO();
+
         for (String keyword : keywords) {
-            // Bỏ qua mấy từ ngắn hoặc quá chung chung
-            if (keyword.length() > 2 && !keyword.equalsIgnoreCase("có") && !keyword.equalsIgnoreCase("không")) {
-                // Gọi DAO với từ khóa cụ thể (ví dụ: "sinh viên")
+            if (keyword.length() > 2
+                    && !keyword.equalsIgnoreCase("có")
+                    && !keyword.equalsIgnoreCase("không")) {
                 List<Announcement> found = announcementDAO.getAllAnnouncements();
-                if (found != null) {
-                    relevantAnnouncements.addAll(found);
-                }
+                if (found != null) relevantAnnouncements.addAll(found);
             }
         }
 
-        // Loại bỏ các kết quả bị trùng lặp
         List<Announcement> distinctAnnouncements = relevantAnnouncements.stream()
                 .distinct()
                 .collect(Collectors.toList());
 
-        if (distinctAnnouncements.isEmpty()) {
-            return ""; // Không tìm thấy gì thì thôi
-        }
+        if (distinctAnnouncements.isEmpty()) return "";
 
-        // Định dạng lại thông tin tìm được để gửi cho AI
         StringBuilder contextBuilder = new StringBuilder();
         contextBuilder.append("Thông tin về các chương trình khuyến mãi, voucher có thể liên quan:\n");
         for (Announcement a : distinctAnnouncements) {
@@ -237,5 +250,9 @@ public class ChatbotService {
                     .append("\n  Nội dung: ").append(a.getContent()).append("\n");
         }
         return contextBuilder.toString();
+    }
+
+    public void clearConversation() {
+        conversationHistory.clear();
     }
 }

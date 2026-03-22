@@ -47,18 +47,16 @@ cd web-security-2026
 
 1.  Tạo schema trong MySQL:
     ```sql
-    CREATE DATABASE ecommerce;
+    CREATE DATABASE web-database;
     ```
 2.  Import dữ liệu: Sử dụng MySQL Workbench, chọn **Data Import**, trỏ đến file `Dump20260315.sql` trong thư mục gốc.
 3.  Cấu hình kết nối: Mở file `src/main/resources/META-INF/persistence.xml` và cập nhật:
     ```xml
-    <property name="jakarta.persistence.jdbc.user" value="TÊN_DÙNG_CỦA_MÀY"/>
-    <property name="jakarta.persistence.jdbc.password" value="MẬT_KHẨU_CỦA_MÀY"/>
+    <property name="jakarta.persistence.jdbc.user" value="USERNAME"/>
+    <property name="jakarta.persistence.jdbc.password" value="PASSWORD"/>
     ```
 
 #### Bước 3: Build và Khởi chạy
-
-Dự án sử dụng **Embedded Tomcat**, mầy không cần cài thêm server ngoài.
 
 ```bash
 mvn clean package
@@ -85,18 +83,14 @@ Mở trình duyệt và truy cập: [http://localhost:8080/home](https://www.goo
   * **Catalog:** Quản lý toàn bộ vòng đời sản phẩm và danh mục.
   * **Vận hành:** Xử lý đơn hàng, quản lý tài khoản người dùng và kiểm duyệt đánh giá.
   * **Marketing:** Cấu hình mã khuyến mãi và gửi thông báo hệ thống.
-
------
-
-## 🖥️ Giao diện ứng dụng
-
-### Trang chủ (Khách hàng)
-
-### Quản lý sản phẩm (Admin)
-
-### Thống kê & Dashboard
-
------
+---
 
 ## 👥 Nhóm phát triển
-
+23162021	Huỳnh Thiên Hạo
+--
+23162022	Trương Nguyễn Minh Hậu
+--
+23162059	Võ Gia Huân
+--
+23162107	Nguyễn Ngân Trường
+--
