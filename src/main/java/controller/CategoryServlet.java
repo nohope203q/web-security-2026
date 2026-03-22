@@ -27,7 +27,7 @@ public class CategoryServlet extends HttpServlet {
             throws ServletException, IOException {
         String action = request.getParameter("action");
         if (action == null) {
-            action = "list"; // Mặc định là hiển thị danh sách
+            action = "list"; 
         }
 
         String url = "/admin/category.jsp";

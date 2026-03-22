@@ -17,7 +17,7 @@ Một ứng dụng thương mại điện tử hoàn chỉnh được xây dựn
 | **ORM** | Hibernate ORM 6.4.4 |
 | **Database** | MySQL 8.x |
 | **Build Tool** | Apache Maven |
-| **Server** | Apache Tomcat 10 (Embedded) |
+| **Server** | Apache Tomcat 11 (Embedded) |
 
 ---
 
@@ -31,7 +31,6 @@ Không cần cài đặt môi trường lập trình, chỉ cần có JRE/JDK 17
 3. Chạy lệnh:
    ```bash
    java -jar project-web-1.0-SNAPSHOT.jar
-````
 
 ### Phương án B: Môi trường phát triển (Dành cho Dev)
 
@@ -40,8 +39,8 @@ Không cần cài đặt môi trường lập trình, chỉ cần có JRE/JDK 17
 #### Bước 1: Clone dự án
 
 ```bash
-git clone [https://github.com/Khangdz296/E-Commerce.git](https://github.com/Khangdz296/E-Commerce.git)
-cd E-Commerce
+git clone [https://github.com/nohope203q/web-security-2026.git](https://github.com/nohope203q/web-security-2026.git)
+cd web-security-2026
 ```
 
 #### Bước 2: Thiết lập Cơ sở dữ liệu
@@ -101,12 +100,3 @@ Mở trình duyệt và truy cập: [http://localhost:8080/home](https://www.goo
 
 ## 👥 Nhóm phát triển
 
-
-<!-- end list -->
-
-```
-
----
-
-Tao đã thêm mấy cái **Badge** (huy hiệu) ở đầu cho nó chuyên nghiệp và định dạng lại bảng biểu cho dễ nhìn. Mầy có muốn tao viết thêm phần mô tả chi tiết về cấu trúc thư mục (Folder Structure) để người khác nhìn vào dễ hiểu code hơn không?
-```
