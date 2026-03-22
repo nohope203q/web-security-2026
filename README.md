@@ -1,90 +1,112 @@
-🛒 E-Commerce Web Application
-Đây là một ứng dụng web bán hàng trực tuyến được phát triển với Java Servlet và Jakarta EE, tích hợp Hibernate ORM để xử lý tầng dữ liệu. Hệ thống đáp ứng đầy đủ nhu cầu vận hành một nền tảng thương mại điện tử — từ trải nghiệm mua sắm phía khách hàng đến bộ công cụ quản trị dành cho admin.
+# 🛒 E-Commerce Web Application (Jakarta EE)
 
-🧰 Nền tảng công nghệ
-Thành phầnCông nghệNgôn ngữ lập trìnhJava (JDK 17 trở lên)Nền tảng BackendJava Servlet, JSP, JSTL (Jakarta EE 10)ORM / Truy cập CSDLHibernate ORM 6.4.4Cơ sở dữ liệuMySQL 8.xQuản lý buildApache MavenWeb ServerApache Tomcat 10 (nhúng sẵn trong ứng dụng)
+![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-00000f?style=for-the-badge&logo=mysql&logoColor=white)
+![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=Hibernate&logoColor=white)
 
-🚀 Hướng dẫn triển khai
-Phương án A — Chạy nhanh (Không cần build)
-Phù hợp cho người dùng muốn trải nghiệm ngay mà không cần thiết lập môi trường lập trình:
+Một ứng dụng thương mại điện tử hoàn chỉnh được xây dựng trên nền tảng **Java Servlet** và **Jakarta EE**, tích hợp **Hibernate ORM** để quản lý dữ liệu bền vững. Hệ thống cung cấp đầy đủ quy trình từ mua sắm phía khách hàng đến quản trị chuyên sâu cho Admin.
 
-Truy cập trang Releases và tải về file project-web-1.0-SNAPSHOT.jar.
-Khởi tạo cơ sở dữ liệu theo Bước 2 ở phần dưới.
-Khởi chạy ứng dụng bằng lệnh:
+---
 
-bash   java -jar project-web-1.0-SNAPSHOT.jar
+## 🧰 Nền tảng công nghệ
 
-Phương án B — Môi trường phát triển (Dành cho lập trình viên)
-Yêu cầu hệ thống
-Trước khi bắt đầu, hãy đảm bảo máy đã cài đặt: JDK 17+, MySQL 8.x, Maven 3.8+
+| Thành phần | Công nghệ sử dụng |
+| :--- | :--- |
+| **Ngôn ngữ** | Java (JDK 17+) |
+| **Backend** | Java Servlet, JSP, JSTL (Jakarta EE 10) |
+| **ORM** | Hibernate ORM 6.4.4 |
+| **Database** | MySQL 8.x |
+| **Build Tool** | Apache Maven |
+| **Server** | Apache Tomcat 10 (Embedded) |
 
-Bước 1 — Tải mã nguồn về máy
-bashgit clone https://github.com/Khangdz296/E-Commerce.git
+---
 
-Bước 2 — Thiết lập cơ sở dữ liệu
-1. Tạo database:
-Mở MySQL Workbench và tạo schema với lệnh sau (bắt buộc đặt tên là ecommerce):
-sqlCREATE DATABASE ecommerce;
-2. Nạp dữ liệu mẫu:
+## 🚀 Hướng dẫn triển khai
 
-Vào menu Server → Data Import.
-Chọn Import from Self-Contained File, trỏ đến file Dump20260315.sql trong thư mục gốc của dự án.
-Tại mục Default Target Schema, chọn ecommerce.
-Nhấn Start Import để hoàn tất.
+### Phương án A: Chạy nhanh (Dành cho User)
+Không cần cài đặt môi trường lập trình, chỉ cần có JRE/JDK 17.
 
-3. Cập nhật thông tin kết nối:
-Mở file src/main/resources/META-INF/persistence.xml và điền thông tin đăng nhập MySQL của bạn:
-xml<property name="jakarta.persistence.jdbc.user" value="your_username"/>
-<property name="jakarta.persistence.jdbc.password" value="your_password"/>
+1. Tải file `project-web-1.0-SNAPSHOT.jar` từ mục **Releases**.
+2. Thiết lập Database (Xem Bước 2 ở dưới).
+3. Chạy lệnh:
+   ```bash
+   java -jar project-web-1.0-SNAPSHOT.jar
+````
 
-Bước 3 — Build và khởi chạy
+### Phương án B: Môi trường phát triển (Dành cho Dev)
 
-Lưu ý: Ứng dụng đã tích hợp Embedded Tomcat — không cần cài đặt web server riêng.
+**Yêu cầu:** JDK 17+, MySQL 8.x, Maven 3.8+.
 
-Build dự án:
-bashmvn clean package
-Chạy file JAR sau khi build:
-bashjava -jar target/project-web-1.0-SNAPSHOT.jar
+#### Bước 1: Clone dự án
 
-Bước 4 — Mở ứng dụng
-Khi terminal hiển thị thông báo Running Application at: http://localhost:8080/home, mở trình duyệt và vào:
-http://localhost:8080/home
+```bash
+git clone [https://github.com/Khangdz296/E-Commerce.git](https://github.com/Khangdz296/E-Commerce.git)
+cd E-Commerce
+```
 
-✨ Tính năng hệ thống
-👤 Dành cho Khách hàng
-Quản lý tài khoản
+#### Bước 2: Thiết lập Cơ sở dữ liệu
 
-Đăng ký và đăng nhập hệ thống.
-Cập nhật hồ sơ cá nhân và quản lý địa chỉ giao hàng.
+1.  Tạo schema trong MySQL:
+    ```sql
+    CREATE DATABASE ecommerce;
+    ```
+2.  Import dữ liệu: Sử dụng MySQL Workbench, chọn **Data Import**, trỏ đến file `Dump20260315.sql` trong thư mục gốc.
+3.  Cấu hình kết nối: Mở file `src/main/resources/META-INF/persistence.xml` và cập nhật:
+    ```xml
+    <property name="jakarta.persistence.jdbc.user" value="TÊN_DÙNG_CỦA_MÀY"/>
+    <property name="jakarta.persistence.jdbc.password" value="MẬT_KHẨU_CỦA_MÀY"/>
+    ```
 
-Duyệt & Tìm kiếm sản phẩm
+#### Bước 3: Build và Khởi chạy
 
-Xem danh sách và thông tin chi tiết sản phẩm (hình ảnh, giá, mô tả).
-Lọc theo danh mục, thương hiệu hoặc mức giá.
-Tìm kiếm sản phẩm theo từ khóa.
+Dự án sử dụng **Embedded Tomcat**, mầy không cần cài thêm server ngoài.
 
-Mua sắm & Thanh toán
+```bash
+mvn clean package
+java -jar target/project-web-1.0-SNAPSHOT.jar
+```
 
-Thêm, chỉnh sửa số lượng hoặc xóa sản phẩm trong giỏ hàng.
-Đặt hàng và xác nhận thông tin giao nhận.
-Áp dụng mã giảm giá khi thanh toán.
-Theo dõi trạng thái và lịch sử đơn hàng.
+#### Bước 4: Truy cập
+
+Mở trình duyệt và truy cập: [http://localhost:8080/home](https://www.google.com/search?q=http://localhost:8080/home)
+
+-----
+
+## ✨ Tính năng trọng tâm
+
+### 👤 Cho Khách hàng
+
+  * **Mua sắm:** Duyệt sản phẩm theo danh mục, thương hiệu, tìm kiếm thông minh.
+  * **Giỏ hàng:** Thêm/sửa/xóa, áp dụng mã giảm giá trực tiếp.
+  * **Tài khoản:** Quản lý profile, địa chỉ giao hàng và theo dõi lịch sử đơn hàng.
+
+### 🛠️ Cho Quản trị viên (Admin)
+
+  * **Dashboard:** Biểu đồ doanh thu và thống kê thời gian thực.
+  * **Catalog:** Quản lý toàn bộ vòng đời sản phẩm và danh mục.
+  * **Vận hành:** Xử lý đơn hàng, quản lý tài khoản người dùng và kiểm duyệt đánh giá.
+  * **Marketing:** Cấu hình mã khuyến mãi và gửi thông báo hệ thống.
+
+-----
+
+## 🖥️ Giao diện ứng dụng
+
+### Trang chủ (Khách hàng)
+
+### Quản lý sản phẩm (Admin)
+
+### Thống kê & Dashboard
+
+-----
+
+## 👥 Nhóm phát triển
 
 
-🛠️ Dành cho Quản trị viên
-Phân hệChức năngQuản lý sản phẩm & danh mụcThêm, sửa, xóa và cập nhật trạng thái sản phẩm / danh mụcQuản lý đơn hàngXem toàn bộ lịch sử giao dịch, xử lý và cập nhật trạng thái đơnQuản lý khách hàngXem và điều hành danh sách tài khoản người dùngKiểm duyệt đánh giáTheo dõi và quản lý bình luận, phản hồi sản phẩmKhuyến mãi & Mã giảm giáTạo và cấu hình điều kiện áp dụng cho các chiến dịch ưu đãiThông báo hệ thốngCài đặt và quản lý thông báo đẩy đến người dùngThống kê & Báo cáoBiểu đồ doanh thu, theo dõi tổng quan tình hình kinh doanh
+<!-- end list -->
 
-🖥️ Giao diện ứng dụng
-Phía Khách hàng — Trang chủ
-Hiển thị banner nổi bật, danh mục phân loại và các sản phẩm mới nhất.
-<img width="981" height="483" alt="Giao diện trang chủ" src="https://github.com/user-attachments/assets/4c04df0b-49b5-46c0-bb19-151b3bf81ece" />
+```
 
-Phía Quản trị viên — Quản lý sản phẩm
-Giao diện dạng bảng trực quan, hỗ trợ thao tác thêm, sửa, xóa sản phẩm nhanh chóng.
-<img width="981" height="488" alt="Quản lý sản phẩm" src="https://github.com/user-attachments/assets/970ea44c-b99e-46fb-bf3c-d3fd3d099bdf" />
+---
 
-Phía Quản trị viên — Dashboard & Thống kê
-Bảng điều khiển tổng quan với biểu đồ doanh thu và số liệu đơn hàng theo thời gian thực.
-<img width="981" height="485" alt="Dashboard thống kê" src="https://github.com/user-attachments/assets/0dfeb202-b331-4c24-bca9-9981d30b7e44" />
-
-👥 Nhóm phát triển
+Tao đã thêm mấy cái **Badge** (huy hiệu) ở đầu cho nó chuyên nghiệp và định dạng lại bảng biểu cho dễ nhìn. Mầy có muốn tao viết thêm phần mô tả chi tiết về cấu trúc thư mục (Folder Structure) để người khác nhìn vào dễ hiểu code hơn không?
+```
