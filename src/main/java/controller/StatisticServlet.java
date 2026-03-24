@@ -16,71 +16,66 @@ public class StatisticServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        resp.setContentType("application/json; charset=UTF-8");
+        String action = req.getParameter("action");
 
-        LocalDate today = LocalDate.now();
-        LocalDate from, to;
+        if ("json".equals(action)) {
+            resp.setContentType("application/json; charset=UTF-8");
 
-        String fromStr = req.getParameter("from");
-        String toStr = req.getParameter("to");
-        String range = req.getParameter("range");
+            LocalDate today = LocalDate.now();
+            LocalDate from, to;
 
-        if (fromStr != null && toStr != null) {
-            from = LocalDate.parse(fromStr);
-            to = LocalDate.parse(toStr);
-        } else {
-            if (range == null) {
-                range = "this_month";
-            }
-            switch (range) {
-                case "today" -> {
-                    from = today;
-                    to = today;
-                }
-                case "yesterday" -> {
-                    from = today.minusDays(1);
-                    to = today.minusDays(1);
-                }
-                case "this_week" -> {
-                    var start = today.with(java.time.DayOfWeek.MONDAY);
-                    from = start;
-                    to = start.plusDays(6);
-                }
-                case "last_week" -> {
-                    var start = today.with(java.time.DayOfWeek.MONDAY).minusWeeks(1);
-                    from = start;
-                    to = start.plusDays(6);
-                }
-                case "last_month" -> {
-                    var first = today.minusMonths(1).withDayOfMonth(1);
-                    from = first;
-                    to = first.withDayOfMonth(first.lengthOfMonth());
-                }
-                default -> {
-                    var first = today.withDayOfMonth(1);
-                    from = first;
-                    to = first.withDayOfMonth(first.lengthOfMonth());
+            String fromStr = req.getParameter("from");
+            String toStr = req.getParameter("to");
+            String range = req.getParameter("range");
+
+            if (fromStr != null && !fromStr.isEmpty() && toStr != null && !toStr.isEmpty()) {
+                from = LocalDate.parse(fromStr);
+                to = LocalDate.parse(toStr);
+            } else {
+                if (range == null) range = "this_month";
+                switch (range) {
+                    case "today" -> { from = today; to = today; }
+                    case "yesterday" -> { from = today.minusDays(1); to = today.minusDays(1); }
+                    case "this_week" -> { 
+                        from = today.with(java.time.DayOfWeek.MONDAY); 
+                        to = from.plusDays(6); 
+                    }
+                    case "last_week" -> { 
+                        from = today.with(java.time.DayOfWeek.MONDAY).minusWeeks(1); 
+                        to = from.plusDays(6); 
+                    }
+                    case "last_month" -> { 
+                        var first = today.minusMonths(1).withDayOfMonth(1);
+                        from = first; 
+                        to = first.withDayOfMonth(first.lengthOfMonth());
+                    }
+                    default -> {
+                        from = today.withDayOfMonth(1);
+                        to = from.withDayOfMonth(from.lengthOfMonth());
+                    }
                 }
             }
+
+            var rev = StatsDB.revenuePerDay(from, to);
+            var ord = StatsDB.ordersPerDay(from, to);
+            var usr = StatsDB.newUsersPerDay(from, to);
+
+            double totalRev = rev.stream().mapToDouble(x -> ((Number) x.get("value")).doubleValue()).sum();
+            long totalOrd = ord.stream().mapToLong(x -> ((Number) x.get("value")).longValue()).sum();
+            long totalUsr = usr.stream().mapToLong(x -> ((Number) x.get("value")).longValue()).sum();
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("from", from.toString());
+            data.put("to", to.toString());
+            data.put("revenueByDay", rev);
+            data.put("ordersByDay", ord);
+            data.put("newUsersByDay", usr);
+            data.put("totals", Map.of("revenue", totalRev, "orders", totalOrd, "users", totalUsr));
+
+            resp.getWriter().write(new Gson().toJson(data));
+        } 
+        else {
+            req.getRequestDispatcher("/admin/statistic.jsp").forward(req, resp);
         }
-
-        var rev = StatsDB.revenuePerDay(from, to);
-        var ord = StatsDB.ordersPerDay(from, to);
-        var usr = StatsDB.newUsersPerDay(from, to);
-
-        double totalRev = rev.stream().mapToDouble(x -> ((Number) x.get("value")).doubleValue()).sum();
-        long totalOrd = ord.stream().mapToLong(x -> ((Number) x.get("value")).longValue()).sum();
-        long totalUsr = usr.stream().mapToLong(x -> ((Number) x.get("value")).longValue()).sum();
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("from", from.toString());
-        data.put("to", to.toString());
-        data.put("revenueByDay", rev);
-        data.put("ordersByDay", ord);
-        data.put("newUsersByDay", usr);
-        data.put("totals", Map.of("revenue", totalRev, "orders", totalOrd, "users", totalUsr));
-
-        resp.getWriter().write(new Gson().toJson(data));
-
     }
 }

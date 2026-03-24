@@ -211,6 +211,15 @@
         <servlet-name>BuyNowControl</servlet-name>
         <url-pattern>/client/buy-now</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>CustomerServlet</servlet-name>
+        <servlet-class>controller.CustomerServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CustomerServlet</servlet-name>
+        <url-pattern>/admin/customer</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>OrderControl</servlet-name>

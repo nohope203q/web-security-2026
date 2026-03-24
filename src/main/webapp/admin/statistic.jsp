@@ -4,26 +4,25 @@
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
-        <title>Thống kê theo ngày</title>
+        <title>Thống kê hệ thống</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
         <link rel="stylesheet" href="<c:url value='/admin/styles/main.css'/>">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
-            .filters{
-                display:flex;
-                gap:10px;
-                align-items:center;
-                margin-bottom:16px
-            }
-            .filters select,.filters input{
-                padding:6px 8px
-            }
+            .main { padding: 20px; }
+            .filters { display:flex; gap:10px; align-items:center; margin-bottom:20px; background: #f8f9fa; padding: 15px; border-radius: 8px; }
+            .filters select, .filters input { padding:8px; border: 1px solid #ddd; border-radius: 4px; }
+            .card-box { display:flex; gap:20px; margin-bottom:25px; }
+            .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1; border-left: 5px solid #28a745; }
+            .card b { font-size: 1.5rem; color: #333; }
+            canvas { background: #fff; margin-bottom: 30px; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         </style>
     </head>
     <body>
         <%@ include file="includes/sidebar.jsp" %>
+        
         <div class="main">
-            <h2>Thống kê theo ngày</h2>
+            <h2><i class="fa-solid fa-chart-line"></i> Thống kê báo cáo</h2>
 
             <div class="filters">
                 <select id="preset">
@@ -33,133 +32,105 @@
                     <option value="last_week">Tuần trước</option>
                     <option value="today">Hôm nay</option>
                     <option value="yesterday">Hôm qua</option>
-                    <option value="">Tùy chọn…</option>
+                    <option value="">Tùy chọn ngày...</option>
                 </select>
                 <input type="date" id="from">
-                <span>→</span>
+                <span>đến</span>
                 <input type="date" id="to">
-                <button class="btn btn-primary" id="apply">Áp dụng</button>
+                <button class="btn btn-primary" id="apply" style="padding: 8px 20px; cursor: pointer;">Lọc dữ liệu</button>
             </div>
 
-            <div class="card-box" style="display:flex;gap:20px;margin-bottom:20px;">
-                <div class="card">Tổng doanh thu<br><b id="totalRev">0 ₫</b></div>
+            <div class="card-box">
+                <div class="card">
+                    <span>Tổng doanh thu</span><br>
+                    <b id="totalRev">0 ₫</b>
+                </div>
+                <div class="card" style="border-left-color: #007bff;">
+                    <span>Tổng đơn hàng</span><br>
+                    <b id="totalOrd">0</b>
+                </div>
+                <div class="card" style="border-left-color: #ffc107;">
+                    <span>Người dùng mới</span><br>
+                    <b id="totalUsr">0</b>
+                </div>
             </div>
 
-            <canvas id="rev"  height="120"></canvas>
-            <canvas id="ord"  height="120"></canvas>
-            <canvas id="usr"  height="120"></canvas>
+            <canvas id="rev" height="100"></canvas>
+            <canvas id="ord" height="100"></canvas>
+            <canvas id="usr" height="100"></canvas>
         </div>
 
         <script>
-            const api = '<c:url value="/admin/statistic"/>';
+            const api = '<c:url value="/admin/statistic"/>?action=json';
 
-            const revChart = new Chart(document.getElementById('rev'), {
+            const chartConfig = (id, label, color) => new Chart(document.getElementById(id), {
                 type: 'line',
-                data: {labels: [], datasets: [{label: 'Doanh thu', data: [], borderColor: '#28a745', fill: false}]},
-                options: {responsive: true, plugins: {title: {display: true, text: ''}}}
+                data: { labels: [], datasets: [{ label: label, data: [], borderColor: color, backgroundColor: color + '22', fill: true, tension: 0.3 }] },
+                options: { responsive: true, plugins: { title: { display: true, text: label } }, scales: { y: { beginAtZero: true } } }
             });
-            const ordChart = new Chart(document.getElementById('ord'), {
-                type: 'line',
-                data: {labels: [], datasets: [{label: 'Đơn hàng', data: [], borderColor: '#007bff', fill: false}]},
-                options: {responsive: true, plugins: {title: {display: true, text: ''}}}
-            });
-            const usrChart = new Chart(document.getElementById('usr'), {
-                type: 'line',
-                data: {labels: [], datasets: [{label: 'Người đăng ký', data: [], borderColor: '#ffc107', fill: false}]},
-                options: {responsive: true, plugins: {title: {display: true, text: ''}}}
-            });
+
+            const revChart = chartConfig('rev', 'Doanh thu (VNĐ)', '#28a745');
+            const ordChart = chartConfig('ord', 'Số lượng đơn hàng', '#007bff');
+            const usrChart = chartConfig('usr', 'Người đăng ký mới', '#ffc107');
 
             function ymdLocal(dt) {
-                var y = dt.getFullYear();
-                var m = String(dt.getMonth() + 1).padStart(2, '0');
-                var d = String(dt.getDate()).padStart(2, '0');
-                return y + '-' + m + '-' + d;
+                return dt.toISOString().split('T')[0];
             }
+
             function daysRangeLocal(fromStr, toStr) {
-                var out = [];
-                var d = new Date(fromStr + 'T00:00:00');
-                var to = new Date(toStr + 'T00:00:00');
+                let out = [], d = new Date(fromStr), to = new Date(toStr);
                 while (d <= to) {
                     out.push(ymdLocal(d));
                     d.setDate(d.getDate() + 1);
                 }
                 return out;
             }
+
             function toMapObj(arr) {
-                var m = new Map();
-                (arr || []).forEach(function (x) {
-                    m.set(x.date, x.value || 0);
-                });
+                let m = new Map();
+                (arr || []).forEach(x => m.set(x.date, x.value || 0));
                 return m;
             }
 
             async function load(params) {
-                var url = api + '?' + new URLSearchParams(params);
-                var res = await fetch(url);
-                var data = await res.json();
+                try {
+                    let url = api + '&' + new URLSearchParams(params);
+                    let res = await fetch(url);
+                    let data = await res.json();
 
-                var rev = data.revenueByDay || [];
-                var ord = data.ordersByDay || [];
-                var usr = data.newUsersByDay || [];
+                    let labels = daysRangeLocal(data.from, data.to);
+                    let maps = [toMapObj(data.revenueByDay), toMapObj(data.ordersByDay), toMapObj(data.newUsersByDay)];
+                    let charts = [revChart, ordChart, usrChart];
 
-                var labels = daysRangeLocal(data.from, data.to);
+                    charts.forEach((chart, i) => {
+                        chart.data.labels = labels;
+                        chart.data.datasets[0].data = labels.map(d => maps[i].get(d) || 0);
+                        chart.update();
+                    });
 
-                var revMap = toMapObj(rev);
-                var ordMap = toMapObj(ord);
-                var usrMap = toMapObj(usr);
+                    document.getElementById('totalRev').innerText = (data.totals.revenue || 0).toLocaleString('vi-VN') + ' ₫';
+                    document.getElementById('totalOrd').innerText = data.totals.orders || 0;
+                    document.getElementById('totalUsr').innerText = data.totals.users || 0;
 
-                revChart.data.labels = labels;
-                revChart.data.datasets[0].data = labels.map(function (d) {
-                    return revMap.get(d) || 0;
-                });
+                    document.getElementById('from').value = data.from;
+                    document.getElementById('to').value = data.to;
 
-                ordChart.data.labels = labels;
-                ordChart.data.datasets[0].data = labels.map(function (d) {
-                    return ordMap.get(d) || 0;
-                });
-
-                usrChart.data.labels = labels;
-                usrChart.data.datasets[0].data = labels.map(function (d) {
-                    return usrMap.get(d) || 0;
-                });
-
-                var totals = (data && data.totals) ? data.totals : {};
-                var totalRev = (typeof totals.revenue === 'number') ? totals.revenue : Number(totals.revenue) || 0;
-                var totalOrd = parseInt(totals.orders, 10) || 0;
-                var totalUsr = parseInt(totals.users, 10) || 0;
-
-                document.getElementById('totalRev').textContent = totalRev.toLocaleString('vi-VN') + ' ₫';
-
-                revChart.options.plugins.title.text = 'Doanh thu • ' + totalRev.toLocaleString('vi-VN') + ' ₫';
-                ordChart.options.plugins.title.text = 'Đơn hàng • ' + totalOrd;
-                usrChart.options.plugins.title.text = 'Người đăng ký • ' + totalUsr;
-
-                revChart.options.scales = {y: {beginAtZero: true}};
-                ordChart.options.scales = {y: {beginAtZero: true, ticks: {precision: 0}}};
-                usrChart.options.scales = {y: {beginAtZero: true, ticks: {precision: 0}}};
-
-                revChart.update();
-                ordChart.update();
-                usrChart.update();
-
-                document.getElementById('from').value = data.from;
-                document.getElementById('to').value = data.to;
+                } catch (e) {
+                    console.error("Lỗi khi tải dữ liệu:", e);
+                }
             }
 
-            document.getElementById('apply').onclick = function () {
-                var preset = document.getElementById('preset').value;
-                var f = document.getElementById('from').value;
-                var t = document.getElementById('to').value;
+            document.getElementById('apply').onclick = () => {
+                let preset = document.getElementById('preset').value;
+                let f = document.getElementById('from').value;
+                let t = document.getElementById('to').value;
 
-                if (preset)
-                    load({range: preset});
-                else if (f && t)
-                    load({from: f, to: t});
-                else
-                    alert('Chọn preset hoặc nhập khoảng ngày!');
+                if (preset) load({ range: preset });
+                else if (f && t) load({ from: f, to: t });
+                else alert('Vui lòng chọn khoảng thời gian!');
             };
 
-            load({range: 'this_month'});
+            load({ range: 'this_month' });
         </script>
     </body>
 </html>
