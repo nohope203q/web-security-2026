@@ -1,7 +1,9 @@
 package com.mycompany.project;
-
 import org.apache.catalina.Context;
+import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.net.SSLHostConfig;
+import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import java.io.*;
 import java.net.URI;
 import java.util.Enumeration;
@@ -11,15 +13,35 @@ import java.util.jar.JarFile;
 public class AppServer {
     public static void main(String[] args) throws Exception {
         Tomcat tomcat = new Tomcat();
-        tomcat.setPort(8080);
-        tomcat.getConnector();
+
+        // Cấu hình HTTPS connector
+        Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
+        connector.setPort(8080);
+        connector.setScheme("https");
+        connector.setSecure(true);
+        connector.setProperty("SSLEnabled", "true");
+
+        SSLHostConfig sslHostConfig = new SSLHostConfig();
+        SSLHostConfigCertificate cert = new SSLHostConfigCertificate(
+            sslHostConfig, SSLHostConfigCertificate.Type.RSA
+        );
+
+        // Trỏ đến file .p12 trong thư mục conf/ (cùng cấp với thư mục chạy)
+        String keystorePath = new File("conf/localhost-rsa.p12").getAbsolutePath();
+        cert.setCertificateKeystoreFile(keystorePath);
+        cert.setCertificateKeystorePassword("123456a@");
+        cert.setCertificateKeystoreType("PKCS12");
+
+        sslHostConfig.addCertificate(cert);
+        connector.addSslHostConfig(sslHostConfig);
+
+        tomcat.setConnector(connector);
 
         File webappDir = extractWebapp();
-
         Context ctx = tomcat.addWebapp("", webappDir.getAbsolutePath());
         ctx.setParentClassLoader(AppServer.class.getClassLoader());
 
-        System.out.println("🚀 Running Application at: http://localhost:8080/home");
+        System.out.println("Running Application at: https://localhost:8080/home");
         tomcat.start();
         tomcat.getServer().await();
     }
