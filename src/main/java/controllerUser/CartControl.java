@@ -57,35 +57,40 @@ public class CartControl extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
 
-        request.setCharacterEncoding("UTF-8");
-        HttpSession session = request.getSession();
-        Account account = (Account) session.getAttribute("account");
-
-        if (!(account instanceof User)) {
-            session.setAttribute("redirectAfterLogin", request.getRequestURI());
-            response.sendRedirect(request.getContextPath() + "/client/login");
-            return;
-        }
-
-        User user = (User) account;
-        List<LineItem> cart = LineItemDAO.getCartItemsByUser(user);
-
-        String action = request.getParameter("action");
-        if (action == null) {
-            action = "cart";
-        }
-
-        handleCartAction(request, action, cart);
-
-        LineItemDAO.saveCart(cart, user);
-        session.setAttribute("cart", cart);
-
-        String referer = request.getHeader("Referer");
-        response.sendRedirect(referer != null ? referer : request.getContextPath() + "/home");
+    request.setCharacterEncoding("UTF-8");
+    HttpSession session = request.getSession();
+    String sessionToken = (String) session.getAttribute("csrfToken");
+    String requestToken = request.getParameter("csrfToken");
+    if (sessionToken == null || !sessionToken.equals(requestToken)) {
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Lỗi xác thực CSRF! Yêu cầu bị từ chối.");
+        return;
     }
+    Account account = (Account) session.getAttribute("account");
+    if (!(account instanceof User)) {
+        session.setAttribute("redirectAfterLogin", request.getRequestURI());
+        response.sendRedirect(request.getContextPath() + "/client/login");
+        return;
+    }
+
+    User user = (User) account;
+    List<LineItem> cart = LineItemDAO.getCartItemsByUser(user);
+
+    String action = request.getParameter("action");
+    if (action == null) { action = "cart"; }
+
+    handleCartAction(request, action, cart);
+
+    LineItemDAO.saveCart(cart, user);
+    session.setAttribute("cart", cart);
+
+    String referer = request.getHeader("Referer");
+    response.sendRedirect(referer != null ? referer : request.getContextPath() + "/home");
+}
+
+
 
     private void handleCartAction(HttpServletRequest request, String action, List<LineItem> cart) {
         try {

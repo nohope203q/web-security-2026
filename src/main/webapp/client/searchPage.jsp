@@ -3,6 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ include file="header/header-search.jsp" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -76,7 +77,7 @@
 
                         <form action="${pageContext.request.contextPath}/client/search" method="get">
                             <c:if test="${not empty searchKeyword}">
-                                <input type="hidden" name="txt" value="${searchKeyword}">
+                              <input type="hidden" name="txt" value="${fn:escapeXml(searchKeyword)}">
                             </c:if>
 
                             <div class="mb-3">
@@ -124,13 +125,10 @@
 
                                 <c:choose>
                                     <c:when test="${not empty searchKeyword}">
-                                        <a href="${pageContext.request.contextPath}/client/search?txt=${searchKeyword}" 
-                                           class="btn btn-outline-secondary">
-                                            Clear Filters
-                                        </a>
+                                      <a href="${pageContext.request.contextPath}/client/search?txt=${fn:escapeXml(searchKeyword)}" class="btn btn-outline-secondary"> Clear Filters </a>
                                     </c:when>
                                     <c:otherwise>
-                                        <a href="${pageContext.request.contextPath}/client/search" 
+                                      <a href="/client/search?txt=${fn:escapeXml(searchKeyword)}">
                                            class="btn btn-outline-secondary">
                                             Clear Filters
                                         </a>
@@ -167,7 +165,7 @@
                                         </span>
                                     </c:if>
                                     <c:if test="${not empty param.brand}">
-                                        <span class="badge bg-info ms-2">Brand: ${param.brand}</span>
+                              <span class="badge bg-info ms-2">Brand: ${fn:escapeXml(param.brand)}<input type="text" name="txt" value="${fn:escapeXml(searchKeyword)}" class="form-control">
                                     </c:if>
                                     <c:if test="${not empty param.minPrice}">
                                         <span class="badge bg-warning ms-2">Min: <fmt:formatNumber value="${param.minPrice}"/> VND</span>
@@ -209,18 +207,25 @@
                                                     <fmt:formatNumber value="${i.price}" type="number"/> VND
                                                 </h6>
 
-                                                <div class="d-flex justify-content-between">
-                                                    <form action="${pageContext.request.contextPath}/cart" method="post" class="flex-grow-1 me-2">
-                                                        <input type="hidden" name="action" value="add">
-                                                        <input type="hidden" name="productId" value="${i.id}">
-                                                        <button type="submit" class="btn btn-outline-primary btn-sm w-100">
-                                                            <i class="fas fa-cart-plus me-1"></i> Thêm vào giỏ
-                                                        </button>
-                                                    </form>
-                                                    <a href="${pageContext.request.contextPath}/buyNow?pid=${i.id}" class="btn btn-primary btn-sm flex-grow-1">
-                                                        Mua ngay
-                                                    </a>
-                                                </div>
+                                        <div class="d-flex justify-content-between">
+
+  <form action="${pageContext.request.contextPath}/cart" method="post" class="flex-grow-1 me-2">
+    <input type="hidden" name="action" value="add">
+    <input type="hidden" name="productId" value="${i.id}">
+    </form>
+
+        <!-- CSRF TOKEN -->
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
+        <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+            <i class="fas fa-cart-plus me-1"></i> Thêm vào giỏ
+        </button>
+    </form>
+    <a href="${pageContext.request.contextPath}/buyNow?pid=${i.id}" 
+       class="btn btn-primary btn-sm flex-grow-1">
+        Mua ngay
+    </a>
+</div>
                                                 <div class="mt-2">
                                                     <a href="${pageContext.request.contextPath}/compare?action=add&productId=${i.id}" 
                                                        class="btn btn-outline-success btn-sm w-100">

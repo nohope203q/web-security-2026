@@ -14,6 +14,7 @@ import model.Admin;
 import model.LineItem;
 import data.LineItemDAO;
 import java.util.List;
+import java.util.UUID;
 
 @WebServlet("/client/login")
 public class LoginServlet extends HttpServlet {
@@ -31,13 +32,14 @@ public class LoginServlet extends HttpServlet {
         String email = req.getParameter("email");
         String password = req.getParameter("password");
         String contextPath = req.getContextPath();
-
+     
         Account account = accountDAO.findByEmail(email);
 
         if (account != null && account.getPassword().equals(data.PasswordUtil.hashPassword(password))) {
             HttpSession session = req.getSession();
             session.setAttribute("account", account);
-
+  String csrfToken = UUID.randomUUID().toString();
+        session.setAttribute("csrfToken", csrfToken);
             if (account instanceof User) {
                 List<LineItem> cart = LineItemDAO.getCartItemsByUser((User) account);
                 session.setAttribute("cart", cart);
