@@ -38,7 +38,7 @@ public class LoginServlet extends HttpServlet {
         if (account != null && account.getPassword().equals(data.PasswordUtil.hashPassword(password))) {
             HttpSession session = req.getSession();
             session.setAttribute("account", account);
-  String csrfToken = UUID.randomUUID().toString();
+        String csrfToken = UUID.randomUUID().toString();
         session.setAttribute("csrfToken", csrfToken);
             if (account instanceof User) {
                 List<LineItem> cart = LineItemDAO.getCartItemsByUser((User) account);

@@ -9,27 +9,46 @@ import java.time.LocalDate;
 import java.util.*;
 import model.Coupon;
 import data.CouponDAO;
+import controller.CsrfUtil; 
 
 @WebServlet("/admin/coupons")
 public class CouponServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // --- BƯỚC 1: TẠO TOKEN MỖI KHI LOAD TRANG (LIST HOẶC FORM) ---
+        String csrfToken = CsrfUtil.generateToken(req);
+        req.setAttribute("csrfToken", csrfToken);
+
         String action = Optional.ofNullable(req.getParameter("action")).orElse("list");
+        
         switch (action) {
             case "addForm":
                 req.getRequestDispatcher("/admin/coupon_form.jsp").forward(req, resp);
                 return;
+
             case "editForm":
                 int id = Integer.parseInt(req.getParameter("id"));
                 req.setAttribute("coupon", CouponDAO.findById(id));
                 req.getRequestDispatcher("/admin/coupon_form.jsp").forward(req, resp);
                 return;
+
             case "delete":
+                // --- BƯỚC 2: CHECK TOKEN CHO HÀNH ĐỘNG XÓA QUA URL ---
+                if (!CsrfUtil.isValidToken(req)) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
+                    return;
+                }
                 CouponDAO.delete(Integer.parseInt(req.getParameter("id")));
                 resp.sendRedirect(req.getContextPath() + "/admin/coupons");
                 return;
+
             case "toggle":
+                // --- BƯỚC 3: CHECK TOKEN CHO HÀNH ĐỘNG THAY ĐỔI TRẠNG THÁI ---
+                if (!CsrfUtil.isValidToken(req)) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
+                    return;
+                }
                 Coupon c = CouponDAO.findById(Integer.parseInt(req.getParameter("id")));
                 if (c != null) {
                     c.setStatus("disabled".equals(c.getStatus()) ? "active" : "disabled");
@@ -37,6 +56,7 @@ public class CouponServlet extends HttpServlet {
                 }
                 resp.sendRedirect(req.getContextPath() + "/admin/coupons");
                 return;
+
             default:
                 CouponDAO.refreshStatuses();
                 req.setAttribute("coupons", CouponDAO.listAll());
@@ -47,6 +67,13 @@ public class CouponServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         req.setCharacterEncoding("UTF-8");
+
+        // --- BƯỚC 4: CHECK TOKEN KHI SUBMIT FORM (LƯU/CẬP NHẬT) ---
+        if (!CsrfUtil.isValidToken(req)) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
+            return;
+        }
+
         String idStr = req.getParameter("id");
         String code = req.getParameter("code").toUpperCase().replaceAll("\\s+", "");
         String type = req.getParameter("type");
@@ -75,6 +102,8 @@ public class CouponServlet extends HttpServlet {
         }
 
         if (!errs.isEmpty()) {
+            // Nếu có lỗi, phải tạo lại token mới để Form tiếp theo vẫn có token hợp lệ
+            req.setAttribute("csrfToken", CsrfUtil.generateToken(req));
             req.setAttribute("errors", errs);
             req.setAttribute("coupon", build(code, type, value, minOrder, maxDiscount, usageLimit, startDate, endDate, idStr));
             req.getRequestDispatcher("/admin/coupon_form.jsp").forward(req, resp);
@@ -90,6 +119,7 @@ public class CouponServlet extends HttpServlet {
         coupon.setUsageLimit(usageLimit);
         coupon.setStartDate(startDate);
         coupon.setEndDate(endDate);
+        
         if (coupon.getId() == null) {
             CouponDAO.insert(coupon);
         } else {
