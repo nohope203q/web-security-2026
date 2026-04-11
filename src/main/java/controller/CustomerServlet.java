@@ -17,7 +17,14 @@ public class CustomerServlet extends HttpServlet {
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
-        
+
+        HttpSession session = request.getSession();
+        String csrfToken = (String) session.getAttribute("csrfToken");
+
+        if (csrfToken == null) {
+            csrfToken = CsrfUtil.generateToken(request);
+        }
+        request.setAttribute("csrfToken", csrfToken);
 
         String action = request.getParameter("action");
         if (action == null) {
@@ -34,13 +41,11 @@ public class CustomerServlet extends HttpServlet {
                 showDetail(request, response);
                 break;
             case "deleteCustomer":
-                // --- BƯỚC 2: KIỂM TRA TOKEN TRƯỚC KHI THỰC HIỆN XÓA (VÌ XÓA ĐANG DÙNG GET) ---
                 if (!CsrfUtil.isValidToken(request)) {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Yêu cầu bị từ chối: CSRF Token không hợp lệ.");
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Yêu cầu bị từ chối: CSRF Token không khớp.");
                     return;
                 }
                 deleteUser(request, response);
-                // Lưu ý: deleteUser bên dưới đã có sendRedirect nên không cần thêm ở đây nữa
                 return;
             default:
                 listUsers(request, response);
@@ -53,7 +58,10 @@ public class CustomerServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Nếu sau này mầy thêm tính năng Update User bằng POST thì nhớ gọi CsrfUtil.isValidToken(request) ở đây nhé.
+        if (!CsrfUtil.isValidToken(request)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Yêu cầu không hợp lệ.");
+            return;
+        }
         doGet(request, response);
     }
 
@@ -86,14 +94,12 @@ public class CustomerServlet extends HttpServlet {
             return;
         }
 
-        // Thực hiện xóa cascade (xóa các dữ liệu liên quan để tránh lỗi ràng buộc FK)
         boolean ok = UserDB.deleteUserCascade(userId);
 
         if (ok) {
             response.sendRedirect(request.getContextPath() + "/admin/customer");
         } else {
-            // Nếu lỗi, quay lại trang danh sách và báo lỗi
-            request.setAttribute("error", "Không thể xóa user do lỗi ràng buộc dữ liệu hoặc lỗi hệ thống.");
+            request.setAttribute("error", "Không thể xóa user do lỗi hệ thống.");
             listUsers(request, response);
         }
     }
@@ -106,11 +112,12 @@ public class CustomerServlet extends HttpServlet {
                 int id = Integer.parseInt(idStr);
                 User user = UserDB.select(id);
                 if (user != null) {
-                    request.setAttribute("user", user); // Đổi "users" thành "user" cho đúng ngữ nghĩa detail
+                    request.setAttribute("user", user);
                     request.getRequestDispatcher("/admin/customer_detail.jsp").forward(request, response);
                     return;
                 }
-            } catch (NumberFormatException e) {}
+            } catch (NumberFormatException e) {
+            }
         }
         response.sendRedirect(request.getContextPath() + "/admin/customer");
     }

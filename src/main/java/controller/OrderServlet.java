@@ -19,6 +19,13 @@ public class OrderServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        HttpSession session = request.getSession();
+        String csrfToken = (String) session.getAttribute("csrfToken");
+        
+        if (csrfToken == null) {
+            csrfToken = CsrfUtil.generateToken(request);
+        }
+        request.setAttribute("csrfToken", csrfToken);
 
         String action = request.getParameter("action");
         if (action == null) {
@@ -30,7 +37,6 @@ public class OrderServlet extends HttpServlet {
                 showEditForm(request, response);
                 break;
             case "delete":
-                // --- BƯỚC 2: KIỂM TRA TOKEN KHI XÓA QUA URL ---
                 if (!CsrfUtil.isValidToken(request)) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "CSRF Token mismatch!");
                     return;
@@ -56,13 +62,13 @@ public class OrderServlet extends HttpServlet {
             throws ServletException, IOException {
         try {
             int id = Integer.parseInt(request.getParameter("id"));
-            Order order = OrderDAO.selectWithRelations(id); 
-            List<Product> products = ProductDAO.selectAll(); 
+            Order order = OrderDAO.selectWithRelations(id);
+            List<Product> products = ProductDAO.selectAll();
             request.setAttribute("order", order);
             request.setAttribute("products", products);
             request.getRequestDispatcher("/admin/order-edit.jsp").forward(request, response);
         } catch (NumberFormatException e) {
-            response.sendRedirect("order");
+            response.sendRedirect(request.getContextPath() + "/admin/order");
         }
     }
 
@@ -85,19 +91,18 @@ public class OrderServlet extends HttpServlet {
             request.setAttribute("order", order);
             request.getRequestDispatcher("/admin/order-detail.jsp").forward(request, response);
         } catch (NumberFormatException e) {
-            response.sendRedirect("order");
+            response.sendRedirect(request.getContextPath() + "/admin/order");
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         request.setCharacterEncoding("UTF-8");
 
-        // --- BƯỚC 3: KIỂM TRA TOKEN KHI CẬP NHẬT TRẠNG THÁI/DỮ LIỆU ĐƠN HÀNG ---
         if (!CsrfUtil.isValidToken(request)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF Token");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF Token (POST)");
             return;
         }
 
@@ -121,7 +126,6 @@ public class OrderServlet extends HttpServlet {
                 String[] productIds = request.getParameterValues("productId");
                 String[] quantities = request.getParameterValues("quantity");
 
-                // Cập nhật lại danh sách item
                 order.getOrderItems().clear();
 
                 if (productIds != null && quantities != null) {
