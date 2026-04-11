@@ -62,10 +62,10 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
 
     request.setCharacterEncoding("UTF-8");
     HttpSession session = request.getSession();
-    String sessionToken = (String) session.getAttribute("csrfToken");
-    String requestToken = request.getParameter("csrfToken");
-    if (sessionToken == null || !sessionToken.equals(requestToken)) {
-        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Lỗi xác thực CSRF! Yêu cầu bị từ chối.");
+    // KIỂM TRA BẢO MẬT CSRF TRƯỚC TIÊN
+    if (!controller.CsrfUtil.isValidToken(request)) {
+        // Nếu không khớp hoặc không có token, chặn ngay lập tức
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Yêu cầu bị từ chối do thiếu mã xác thực bảo mật (CSRF)!");
         return;
     }
     Account account = (Account) session.getAttribute("account");
@@ -89,8 +89,6 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
     String referer = request.getHeader("Referer");
     response.sendRedirect(referer != null ? referer : request.getContextPath() + "/home");
 }
-
-
 
     private void handleCartAction(HttpServletRequest request, String action, List<LineItem> cart) {
         try {
