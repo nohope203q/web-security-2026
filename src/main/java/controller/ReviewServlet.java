@@ -4,12 +4,13 @@ import data.ProductDAO;
 import data.ReviewDAO;
 import model.Product;
 import model.Review;
-
+import controller.CsrfUtil; 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
@@ -19,12 +20,25 @@ public class ReviewServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        HttpSession session = request.getSession();
+        String csrfToken = (String) session.getAttribute("csrfToken");
+        
+        if (csrfToken == null) {
+            csrfToken = CsrfUtil.generateToken(request);
+        }
+        request.setAttribute("csrfToken", csrfToken);
+
         String action = request.getParameter("action");
         if (action == null) {
             action = "list";
         }
 
         if (action.equals("delete")) {
+            if (!CsrfUtil.isValidToken(request)) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Yêu cầu không hợp lệ (CSRF Token mismatch)");
+                return;
+            }
             handleDelete(request, response);
             return;
         }
@@ -84,6 +98,11 @@ public class ReviewServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        if (!CsrfUtil.isValidToken(request)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Yêu cầu bị từ chối do bảo mật (CSRF)");
+            return;
+        }
         doGet(request, response);
     }
 }

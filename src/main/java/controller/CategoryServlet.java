@@ -11,6 +11,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @WebServlet(name = "CategoryServlet", urlPatterns = {"/admin/category"})
 public class CategoryServlet extends HttpServlet {
@@ -19,6 +20,14 @@ public class CategoryServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        HttpSession session = request.getSession();
+        String csrfToken = (String) session.getAttribute("csrfToken");
+        
+        if (csrfToken == null) {
+            csrfToken = CsrfUtil.generateToken(request);
+        }
+        request.setAttribute("csrfToken", csrfToken);
+
         String action = request.getParameter("action");
         if (action == null) {
             action = "list";
@@ -51,7 +60,6 @@ public class CategoryServlet extends HttpServlet {
                 }
             }
             case "delete" -> {
-                // --- BƯỚC 2: KIỂM TRA TOKEN KHI XÓA QUA URL (GET) ---
                 if (!CsrfUtil.isValidToken(request)) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
                     return;
@@ -71,9 +79,8 @@ public class CategoryServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        // --- BƯỚC 3: KIỂM TRA TOKEN KHI SUBMIT FORM (ADD/UPDATE) ---
         if (!CsrfUtil.isValidToken(request)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token (POST)");
             return;
         }
 

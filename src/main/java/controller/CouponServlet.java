@@ -17,6 +17,14 @@ public class CouponServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+        HttpSession session = req.getSession();
+        String csrfToken = (String) session.getAttribute("csrfToken");
+        
+        if (csrfToken == null) {
+            csrfToken = CsrfUtil.generateToken(req);
+        }
+        req.setAttribute("csrfToken", csrfToken);
+
         String action = Optional.ofNullable(req.getParameter("action")).orElse("list");
         
         switch (action) {
@@ -25,15 +33,18 @@ public class CouponServlet extends HttpServlet {
                 return;
 
             case "editForm":
-                int id = Integer.parseInt(req.getParameter("id"));
-                req.setAttribute("coupon", CouponDAO.findById(id));
-                req.getRequestDispatcher("/admin/coupon_form.jsp").forward(req, resp);
+                try {
+                    int id = Integer.parseInt(req.getParameter("id"));
+                    req.setAttribute("coupon", CouponDAO.findById(id));
+                    req.getRequestDispatcher("/admin/coupon_form.jsp").forward(req, resp);
+                } catch (NumberFormatException e) {
+                    resp.sendRedirect(req.getContextPath() + "/admin/coupons");
+                }
                 return;
 
             case "delete":
-                // --- BƯỚC 2: CHECK TOKEN CHO HÀNH ĐỘNG XÓA QUA URL ---
                 if (!CsrfUtil.isValidToken(req)) {
-                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token (Delete)");
                     return;
                 }
                 CouponDAO.delete(Integer.parseInt(req.getParameter("id")));
@@ -41,15 +52,18 @@ public class CouponServlet extends HttpServlet {
                 return;
 
             case "toggle":
-                // --- BƯỚC 3: CHECK TOKEN CHO HÀNH ĐỘNG THAY ĐỔI TRẠNG THÁI ---
                 if (!CsrfUtil.isValidToken(req)) {
-                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token (Toggle)");
                     return;
                 }
-                Coupon c = CouponDAO.findById(Integer.parseInt(req.getParameter("id")));
-                if (c != null) {
-                    c.setStatus("disabled".equals(c.getStatus()) ? "active" : "disabled");
-                    CouponDAO.update(c);
+                try {
+                    Coupon c = CouponDAO.findById(Integer.parseInt(req.getParameter("id")));
+                    if (c != null) {
+                        c.setStatus("disabled".equals(c.getStatus()) ? "active" : "disabled");
+                        CouponDAO.update(c);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
                 resp.sendRedirect(req.getContextPath() + "/admin/coupons");
                 return;
@@ -65,9 +79,8 @@ public class CouponServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         req.setCharacterEncoding("UTF-8");
 
-        // --- BƯỚC 4: CHECK TOKEN KHI SUBMIT FORM (LƯU/CẬP NHẬT) ---
         if (!CsrfUtil.isValidToken(req)) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token (POST)");
             return;
         }
 
@@ -99,7 +112,6 @@ public class CouponServlet extends HttpServlet {
         }
 
         if (!errs.isEmpty()) {
-            // Nếu có lỗi, phải tạo lại token mới để Form tiếp theo vẫn có token hợp lệ
             req.setAttribute("csrfToken", CsrfUtil.generateToken(req));
             req.setAttribute("errors", errs);
             req.setAttribute("coupon", build(code, type, value, minOrder, maxDiscount, usageLimit, startDate, endDate, idStr));

@@ -17,6 +17,14 @@ public class AnnouncementServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
+        HttpSession session = req.getSession();
+        String csrfToken = (String) session.getAttribute("csrfToken");
+        
+        if (csrfToken == null) {
+            csrfToken = CsrfUtil.generateToken(req);
+        }
+        req.setAttribute("csrfToken", csrfToken);
+
         String action = req.getParameter("action");
         if (action == null) {
             action = "list";
@@ -24,9 +32,8 @@ public class AnnouncementServlet extends HttpServlet {
 
         switch (action) {
             case "delete":
-                // --- BƯỚC 2: CHECK TOKEN CHO HÀNH ĐỘNG XÓA QUA URL (GET) ---
                 if (!CsrfUtil.isValidToken(req)) {
-                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Yêu cầu không hợp lệ (CSRF)");
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Yêu cầu không hợp lệ (CSRF Token mismatch)");
                     return;
                 }
                 handleDelete(req, resp);
@@ -53,14 +60,12 @@ public class AnnouncementServlet extends HttpServlet {
 
         req.setCharacterEncoding("UTF-8");
 
-        // --- BƯỚC 3: CHECK TOKEN KHI SUBMIT FORM (INSERT/UPDATE) ---
         if (!CsrfUtil.isValidToken(req)) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Phiên làm việc hết hạn hoặc yêu cầu không hợp lệ");
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Phiên làm việc hết hạn hoặc yêu cầu không hợp lệ (CSRF)");
             return;
         }
 
-        String action = req.getParameter("action"); // "insert" | "update"
-
+        String action = req.getParameter("action");
         Announcement a = new Announcement();
         a.setTitle(req.getParameter("title"));
         a.setContent(req.getParameter("content"));
@@ -69,13 +74,10 @@ public class AnnouncementServlet extends HttpServlet {
         sdf.setLenient(false);
 
         Date start, end;
-        Date today = new Date();
         try {
             start = sdf.parse(req.getParameter("startDate"));
             end = sdf.parse(req.getParameter("endDate"));
         } catch (Exception e) {
-            // Nếu lỗi form, tạo lại token để form tiếp theo vẫn an toàn
-            req.setAttribute("csrfToken", CsrfUtil.generateToken(req));
             req.setAttribute("error", "Ngày không hợp lệ (định dạng yyyy-MM-dd).");
             req.setAttribute("announcements", a);
             req.getRequestDispatcher("/admin/announcement_form.jsp").forward(req, resp);
@@ -83,7 +85,6 @@ public class AnnouncementServlet extends HttpServlet {
         }
 
         if (end.before(start)) {
-            req.setAttribute("csrfToken", CsrfUtil.generateToken(req));
             req.setAttribute("error", "Ngày kết thúc phải sau ngày bắt đầu.");
             a.setStartDate(start);
             a.setEndDate(end);
@@ -167,7 +168,6 @@ public class AnnouncementServlet extends HttpServlet {
 
     private String deriveStatus(Date start, Date end) {
         Date today = new Date();
-        // Reset thời gian về 00:00:00 để so sánh ngày chính xác
         Calendar cal = Calendar.getInstance();
         cal.setTime(today);
         cal.set(Calendar.HOUR_OF_DAY, 0);

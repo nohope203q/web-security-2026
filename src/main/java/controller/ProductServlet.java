@@ -18,6 +18,14 @@ public class ProductServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        HttpSession session = request.getSession();
+        String csrfToken = (String) session.getAttribute("csrfToken");
+        
+        if (csrfToken == null) {
+            csrfToken = CsrfUtil.generateToken(request);
+        }
+        request.setAttribute("csrfToken", csrfToken);
+
         String action = request.getParameter("action");
         String keyword = request.getParameter("keyword");
         Long id = parseLongSafe(request.getParameter("id"));
@@ -46,7 +54,6 @@ public class ProductServlet extends HttpServlet {
                 }
 
                 case "delete": {
-                    // --- BƯỚC 2: KIỂM TRA TOKEN KHI XÓA QUA LINK GET ---
                     if (!CsrfUtil.isValidToken(request)) {
                         response.sendError(HttpServletResponse.SC_FORBIDDEN, "Yêu cầu không hợp lệ (CSRF Token mismatch)");
                         return;
@@ -100,9 +107,8 @@ public class ProductServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
-        // --- BƯỚC 3: KIỂM TRA TOKEN KHI SUBMIT FORM (ADD/UPDATE) ---
         if (!CsrfUtil.isValidToken(request)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Yêu cầu bị từ chối vì lý do bảo mật");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Yêu cầu bị từ chối vì lý do bảo mật (CSRF)");
             return;
         }
 
@@ -160,7 +166,6 @@ public class ProductServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/product");
     }
 
-    // --- CÁC HÀM HELPER PARSE DỮ LIỆU AN TOÀN ---
     private Long parseLongSafe(String s) {
         try { return (s != null && !s.isEmpty()) ? Long.parseLong(s) : null; } 
         catch (Exception e) { return null; }
