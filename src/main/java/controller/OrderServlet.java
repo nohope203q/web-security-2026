@@ -10,6 +10,7 @@ import java.util.*;
 import model.Order;
 import model.OrderItem;
 import model.Product;
+import controller.CsrfUtil;
 
 @WebServlet("/admin/order")
 public class OrderServlet extends HttpServlet {
@@ -17,6 +18,7 @@ public class OrderServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
 
         String action = request.getParameter("action");
         if (action == null) {
@@ -28,6 +30,11 @@ public class OrderServlet extends HttpServlet {
                 showEditForm(request, response);
                 break;
             case "delete":
+                // --- BƯỚC 2: KIỂM TRA TOKEN KHI XÓA QUA URL ---
+                if (!CsrfUtil.isValidToken(request)) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "CSRF Token mismatch!");
+                    return;
+                }
                 deleteOrder(request, response);
                 break;
             case "detail":
@@ -47,32 +54,52 @@ public class OrderServlet extends HttpServlet {
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        Order order = OrderDAO.selectWithRelations(id); // Lấy order + danh sách order_items
-        List<Product> products = ProductDAO.selectAll(); // để admin chọn thêm sản phẩm mới
-        request.setAttribute("order", order);
-        request.setAttribute("products", products);
-        request.getRequestDispatcher("/admin/order-edit.jsp").forward(request, response);
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            Order order = OrderDAO.selectWithRelations(id); 
+            List<Product> products = ProductDAO.selectAll(); 
+            request.setAttribute("order", order);
+            request.setAttribute("products", products);
+            request.getRequestDispatcher("/admin/order-edit.jsp").forward(request, response);
+        } catch (NumberFormatException e) {
+            response.sendRedirect("order");
+        }
     }
 
     private void deleteOrder(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        OrderDAO.delete(id);
-        response.sendRedirect("order");
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            OrderDAO.delete(id);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+        response.sendRedirect(request.getContextPath() + "/admin/order");
     }
 
     private void showDetail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        Order order = OrderDAO.selectWithRelations(id);
-        request.setAttribute("order", order);
-        request.getRequestDispatcher("/admin/order-detail.jsp").forward(request, response);
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            Order order = OrderDAO.selectWithRelations(id);
+            request.setAttribute("order", order);
+            request.getRequestDispatcher("/admin/order-detail.jsp").forward(request, response);
+        } catch (NumberFormatException e) {
+            response.sendRedirect("order");
+        }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        request.setCharacterEncoding("UTF-8");
+
+        // --- BƯỚC 3: KIỂM TRA TOKEN KHI CẬP NHẬT TRẠNG THÁI/DỮ LIỆU ĐƠN HÀNG ---
+        if (!CsrfUtil.isValidToken(request)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF Token");
+            return;
+        }
 
         String action = request.getParameter("action");
         if ("update".equals(action)) {
@@ -82,36 +109,40 @@ public class OrderServlet extends HttpServlet {
 
     private void updateOrder(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        int orderId = Integer.parseInt(request.getParameter("id"));
-        Order order = OrderDAO.selectWithRelations(orderId);
+        try {
+            int orderId = Integer.parseInt(request.getParameter("id"));
+            Order order = OrderDAO.selectWithRelations(orderId);
 
-        if (order != null) {
-            order.setShippingAddress(request.getParameter("shippingAddress"));
-            order.setPaymentMethod(request.getParameter("paymentMethod"));
-            order.setStatus(Integer.parseInt(request.getParameter("status")));
+            if (order != null) {
+                order.setShippingAddress(request.getParameter("shippingAddress"));
+                order.setPaymentMethod(request.getParameter("paymentMethod"));
+                order.setStatus(Integer.parseInt(request.getParameter("status")));
 
-            String[] productIds = request.getParameterValues("productId");
-            String[] quantities = request.getParameterValues("quantity");
+                String[] productIds = request.getParameterValues("productId");
+                String[] quantities = request.getParameterValues("quantity");
 
-            order.getOrderItems().clear();
+                // Cập nhật lại danh sách item
+                order.getOrderItems().clear();
 
-            if (productIds != null && quantities != null) {
-                for (int i = 0; i < productIds.length; i++) {
-                    int pid = Integer.parseInt(productIds[i]);
-                    int qty = Integer.parseInt(quantities[i]);
+                if (productIds != null && quantities != null) {
+                    for (int i = 0; i < productIds.length; i++) {
+                        int pid = Integer.parseInt(productIds[i]);
+                        int qty = Integer.parseInt(quantities[i]);
 
-                    Product product = ProductDAO.select(pid);
-                    if (product != null && qty > 0) {
-                        OrderItem item = new OrderItem();
-                        item.setProduct(product);
-                        item.setQuantity(qty);
-                        item.setOrder(order);
-                        order.getOrderItems().add(item);
+                        Product product = ProductDAO.select(pid);
+                        if (product != null && qty > 0) {
+                            OrderItem item = new OrderItem();
+                            item.setProduct(product);
+                            item.setQuantity(qty);
+                            item.setOrder(order);
+                            order.getOrderItems().add(item);
+                        }
                     }
                 }
+                OrderDAO.update(order);
             }
-
-            OrderDAO.update(order);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
         }
 
         response.sendRedirect(request.getContextPath() + "/admin/order");

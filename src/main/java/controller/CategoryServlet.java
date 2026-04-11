@@ -19,10 +19,6 @@ public class CategoryServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        // --- BƯỚC 1: TẠO TOKEN MỚI CHO MỖI LẦN LOAD TRANG ---
-        String csrfToken = CsrfUtil.generateToken(request);
-        request.setAttribute("csrfToken", csrfToken);
-
         String action = request.getParameter("action");
         if (action == null) {
             action = "list";

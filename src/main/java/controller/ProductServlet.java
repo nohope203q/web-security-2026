@@ -18,10 +18,6 @@ public class ProductServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // --- BƯỚC 1: TẠO CSRF TOKEN MỚI CHO MỖI LẦN TRUY CẬP ---
-        String csrfToken = CsrfUtil.generateToken(request);
-        request.setAttribute("csrfToken", csrfToken);
-
         String action = request.getParameter("action");
         String keyword = request.getParameter("keyword");
         Long id = parseLongSafe(request.getParameter("id"));
