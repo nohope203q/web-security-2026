@@ -16,9 +16,6 @@ public class CouponServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // --- BƯỚC 1: TẠO TOKEN MỖI KHI LOAD TRANG (LIST HOẶC FORM) ---
-        String csrfToken = CsrfUtil.generateToken(req);
-        req.setAttribute("csrfToken", csrfToken);
 
         String action = Optional.ofNullable(req.getParameter("action")).orElse("list");
         
