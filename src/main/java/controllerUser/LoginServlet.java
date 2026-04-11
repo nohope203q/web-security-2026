@@ -14,7 +14,7 @@ import model.Admin;
 import model.LineItem;
 import data.LineItemDAO;
 import java.util.List;
-import java.util.UUID;
+import controller.CsrfUtil;
 
 @WebServlet("/client/login")
 public class LoginServlet extends HttpServlet {
@@ -24,22 +24,27 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+       String csrfToken = CsrfUtil.generateToken(req);
+        req.setAttribute("csrfToken", csrfToken);
         req.getRequestDispatcher("/client/login.jsp").forward(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+         if (!CsrfUtil.isValidToken(req)) {
+        resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF Token");
+        return;
+    }
         String email = req.getParameter("email");
         String password = req.getParameter("password");
         String contextPath = req.getContextPath();
-     
+    
         Account account = accountDAO.findByEmail(email);
 
         if (account != null && account.getPassword().equals(data.PasswordUtil.hashPassword(password))) {
             HttpSession session = req.getSession();
             session.setAttribute("account", account);
-        String csrfToken = UUID.randomUUID().toString();
-        session.setAttribute("csrfToken", csrfToken);
+            controller.CsrfUtil.generateToken(req);
             if (account instanceof User) {
                 List<LineItem> cart = LineItemDAO.getCartItemsByUser((User) account);
                 session.setAttribute("cart", cart);
@@ -65,3 +70,5 @@ public class LoginServlet extends HttpServlet {
         }
     }
 }
+
+
