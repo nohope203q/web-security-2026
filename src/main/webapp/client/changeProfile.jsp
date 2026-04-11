@@ -8,35 +8,30 @@
     <body>
         <div class="container">
             <h2>Cập nhật thông tin cá nhân</h2>
-
             <form action="${pageContext.request.contextPath}/client/ChangeProfileServlet" method="post">
                 <div class="form-group">
                     <label for="name">Họ và tên:</label>
-                    <input type="text" id="name" name="name" value="${account.name}" required>
+                    <input type="text" id="name" name="name" value="<c:out value='${account.name}'/>" required>
                 </div>
-
                 <div class="form-group">
                     <label for="phone">Số điện thoại:</label>
-                    <input type="text" id="phone" name="phone" value="${account.phone}" required>
+                    <input type="text" id="phone" name="phone" value="<c:out value='${account.phone}'/>" required>
                 </div>
-
                 <div class="form-group">
                     <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" value="${account.email}" required>
+                    <input type="email" id="email" name="email" value="<c:out value='${account.email}'/>" required>
                     <p style="font-size: 13px; color: gray;">Nếu bạn đổi email, hệ thống sẽ gửi mã OTP xác nhận địa chỉ mới.</p>
                 </div>
-
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">Lưu thay đổi</button>
                     <a href="${pageContext.request.contextPath}/client/profile" class="btn-secondary">Hủy</a>
                 </div>
             </form>
-
             <c:if test="${not empty error}">
-                <p class="error">${error}</p>
+                <p class="error"><c:out value="${error}"/></p>
             </c:if>
             <c:if test="${not empty message}">
-                <p class="success">${message}</p>
+                <p class="success"><c:out value="${message}"/></p>
             </c:if>
         </div>
     </body>

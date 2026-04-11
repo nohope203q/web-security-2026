@@ -15,8 +15,8 @@
             <div class="profile-sidebar">
                 <div class="profile-header">
                     <img src="https://img.pikbest.com/illustration/20250214/anime-kitten--22meow-22-font-white--26-black-fur-pink-tiny-paws-vibrant-yellow-bg_11525404.jpg!w700wp" alt="Avatar" class="profile-avatar">
-                    <h2>${account.name}</h2>
-                    <p class="user-email"><i class="fa-solid fa-envelope"></i> ${account.email}</p>
+                    <h2><c:out value="${account.name}"/></h2>
+                    <p class="user-email"><i class="fa-solid fa-envelope"></i> <c:out value="${account.email}"/></p>
                     <a href="${pageContext.request.contextPath}/client/logout" class="logout-link">
                         <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
                     </a>
@@ -45,9 +45,9 @@
                 <div class="profile-body">
                     <div class="info-section">
                         <h3><i class="fa-solid fa-user"></i> Thông tin cá nhân</h3>
-                        <p><span class="label">Tên:</span> <span class="value">${account.name}</span></p>
-                        <p><span class="label">Số điện thoại:</span> <span class="value">${account.phone}</span></p>
-                        <p><span class="label">Trạng thái:</span> 
+                        <p><span class="label">Tên:</span> <span class="value"><c:out value="${account.name}"/></span></p>
+                        <p><span class="label">Số điện thoại:</span> <span class="value"><c:out value="${account.phone}"/></span></p>
+                        <p><span class="label">Trạng thái:</span>
                             <span class="status ${account.status == 1 ? 'status-active' : 'status-inactive'}">
                                 ${account.status == 1 ? 'Active' : 'Inactive'}
                             </span>
@@ -59,7 +59,9 @@
                         <c:choose>
                             <c:when test="${account.address != null}">
                                 <div class="address-line">
-                                    ${account.address.street}, ${account.address.city}, ${account.address.postalCode}
+                                    <c:out value="${account.address.street}"/>,
+                                    <c:out value="${account.address.city}"/>,
+                                    <c:out value="${account.address.postalCode}"/>
                                 </div>
                             </c:when>
                             <c:otherwise>
