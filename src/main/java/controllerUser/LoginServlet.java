@@ -31,10 +31,11 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-         if (!CsrfUtil.isValidToken(req)) {
+        if (!CsrfUtil.isValidToken(req)) {
         resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF Token");
         return;
     }
+
         String email = req.getParameter("email");
         String password = req.getParameter("password");
         String contextPath = req.getContextPath();

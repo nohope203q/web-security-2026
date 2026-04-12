@@ -36,7 +36,7 @@
 
                     <form method="get" action="order-tracking" class="search-box">
                         <input type="hidden" name="status" value="${activeTab}">
-                        <input type="text" name="keyword" placeholder="Tìm theo tên sản phẩm, địa chỉ, hoặc ID đơn hàng..." value="${param.keyword}">
+                        <input type="text" name="keyword" placeholder="Tìm theo tên sản phẩm, địa chỉ, hoặc ID đơn hàng..." value="<c:out value='${param.keyword}'/>">
                     </form>
                     <c:choose>
                         <c:when test="${empty orders}">
@@ -78,10 +78,10 @@
 
                                             <div class="order-info">
                                                 <h3>${item.product.name}</h3>
-                                                <p><strong>Thương hiệu:</strong> ${item.product.brand}</p>
-                                                <p><strong>Màu:</strong> ${item.product.color}</p>
+                                                <p><strong>Thương hiệu:</strong> <c:out value="${item.product.brand}"/></p>
+                                                <p><strong>Màu:</strong> <c:out value="${item.product.color}"/></p>
                                                 <p><strong>Giá:</strong> <fmt:formatNumber value="${item.product.price}" type="currency" currencySymbol="₫"/></p>
-                                                <p><strong>Số lượng:</strong> ${item.quantity}</p>
+                                                <p><strong>Số lượng:</strong> <c:out value="${order.paymentMethod}"/></p>
                                             </div>
                                         </div>
                                     </c:forEach>

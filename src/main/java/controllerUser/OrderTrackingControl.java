@@ -29,6 +29,14 @@ public class OrderTrackingControl extends HttpServlet {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         String statusParam = request.getParameter("status");
         String keyword = request.getParameter("keyword");
+        if (keyword != null && keyword.length() > 100) 
+        {
+            keyword = keyword.substring(0, 100); // giới hạn độ dài
+        }
+        if (keyword != null && keyword.matches(".*[<>\"'].*")) 
+        {
+            keyword = "";  // reject nếu chứa ký tự HTML nguy hiểm
+        }
         List<Order> orders;
 
         try {
