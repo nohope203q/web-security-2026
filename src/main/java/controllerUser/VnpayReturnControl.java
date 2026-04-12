@@ -1,18 +1,19 @@
 package controllerUser;
 
-import model.OrderItem;
-import model.Product;
-import model.Order;
-import model.Invoice;
-import jakarta.persistence.*;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
-import model.Coupon;
-import data.DBUtil;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import data.DBUtil;
+import jakarta.persistence.EntityManager;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import model.Invoice;
+import model.Order;
 
 @WebServlet("/client/vnpay-return")
 public class VnpayReturnControl extends HttpServlet {
@@ -39,48 +40,26 @@ public class VnpayReturnControl extends HttpServlet {
 
             if ("00".equals(vnp_ResponseCode)) {
                 EntityManager em = DBUtil.getEmFactory().createEntityManager();
-                EntityTransaction trans = em.getTransaction();
                 try {
-                    trans.begin();
                     Order order = em.find(Order.class, Integer.parseInt(txnRef));
 
-                    if (order != null && order.getStatus() == -1) {
-                        order.setStatus(0);
-
-                        for (OrderItem item : order.getOrderItems()) {
-                            Product product = em.find(Product.class, item.getProduct().getId());
-                            if (product != null) {
-                                product.setQuantity(product.getQuantity() - item.getQuantity());
-                                em.merge(product);
-                            }
-                        }
-
-                        if (order.getCouponCode() != null && !order.getCouponCode().isEmpty()) {
-                            try {
-                                Coupon coupon = em.createQuery("SELECT c FROM Coupon c WHERE c.code = :code", Coupon.class)
-                                        .setParameter("code", order.getCouponCode())
-                                        .getSingleResult();
-                                if (coupon != null) {
-                                    coupon.setUsedCount(coupon.getUsedCount() + 1);
-                                    em.merge(coupon);
-                                }
-                            } catch (NoResultException e) {
-                                System.out.println("Không tìm thấy coupon: " + order.getCouponCode());
-                            }
-                        }
-
-                        Invoice invoice = Invoice.generateFromOrder(order);
-                        em.persist(invoice);
-
-                        em.merge(order);
-                        trans.commit();
-
+                    if (order != null && (order.getStatus() == -1 || order.getStatus() == 0)) {
+                        
+                        // CWE-841: Khắc phục kiến trúc - Nhường lại logic xử lý duyệt đơn, trừ kho cho IPN Webhook
+                        // Ở file ReturnURL này chỉ tiến hành thông báo hiển thị cho người dùng và xóa giỏ hàng
+                        
                         HttpSession session = req.getSession();
                         session.removeAttribute("cart");
                         session.removeAttribute("appliedCoupon");
                         session.removeAttribute("discountAmount");
                         session.setAttribute("latestOrder", order);
-                        session.setAttribute("latestInvoice", invoice);
+                        
+                        // Tìm hiển thị Invoice nếu IPN đã kịp sinh ra
+                        try {
+                            Invoice invoice = em.createQuery("SELECT i FROM Invoice i WHERE i.order.id = :orderId", Invoice.class)
+                                      .setParameter("orderId", order.getId()).setMaxResults(1).getSingleResult();
+                            session.setAttribute("latestInvoice", invoice);
+                        } catch (Exception ex) {}
 
                         resp.sendRedirect(req.getContextPath() + "/client/order-success.jsp");
                         return;
@@ -89,9 +68,6 @@ public class VnpayReturnControl extends HttpServlet {
                         return;
                     }
                 } catch (Exception e) {
-                    if (trans.isActive()) {
-                        trans.rollback();
-                    }
                     e.printStackTrace();
                     resp.sendRedirect(req.getContextPath() + "/client/order-error.jsp");
                 } finally {
