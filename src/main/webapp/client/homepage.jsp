@@ -152,7 +152,7 @@
 
                                 <%-- Nút Previous (Lùi) --%>
                                 <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                                    <a class="page-link" href="${pageContext.request.contextPath}/?page=${currentPage - 1}&txt=${fn:escapeXml(param.txt)}&category=${param.category}&brand=${fn:escapeXml(param.brand)}&minPrice=${param.minPrice}&maxPrice=${param.maxPrice}" aria-label="Previous">
+                                    <a class="page-link" href="${pageContext.request.contextPath}/?page=${currentPage - 1}&txt=${fn:escapeXml(param.txt)}&category=${param.category}&brand=${fn:escapeXml(param.brand)}&minPrice=${fn:escapeXml(param.minPrice)}&maxPrice=${fn:escapeXml(param.maxPrice)}" aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
                                 </li>
@@ -160,13 +160,13 @@
                                 <%-- Các nút số trang --%>
                                 <c:forEach begin="1" end="${totalPages}" var="pageNumber">
                                     <li class="page-item ${pageNumber == currentPage ? 'active' : ''}">
-                                        <a class="page-link" href="${pageContext.request.contextPath}/?page=${pageNumber}&txt=${fn:escapeXml(param.txt)}&category=${param.category}&brand=${fn:escapeXml(param.brand)}&minPrice=${param.minPrice}&maxPrice=${param.maxPrice}">${pageNumber}</a>
+                                        <a class="page-link" href="${pageContext.request.contextPath}/?page=${pageNumber}&txt=${fn:escapeXml(param.txt)}&category=${param.category}&brand=${fn:escapeXml(param.brand)}&minPrice=${fn:escapeXml(param.minPrice)}&maxPrice=${fn:escapeXml(param.maxPrice)}">${pageNumber}</a>
                                     </li>
                                 </c:forEach>
 
                                 <%-- Nút Next (Tiến) --%>
                                 <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
-                                    <a class="page-link" href="${pageContext.request.contextPath}/?page=${currentPage + 1}&txt=${fn:escapeXml(param.txt)}&category=${param.category}&brand=${fn:escapeXml(param.brand)}&minPrice=${param.minPrice}&maxPrice=${param.maxPrice}" aria-label="Next">
+                                    <a class="page-link" href="${pageContext.request.contextPath}/?page=${currentPage + 1}&txt=${fn:escapeXml(param.txt)}&category=${param.category}&brand=${fn:escapeXml(param.brand)}&minPrice=${fn:escapeXml(param.minPrice)}&maxPrice=${fn:escapeXml(param.maxPrice)}" aria-label="Next">
                                         <span aria-hidden="true">&raquo;</span>
                                     </a>
                                 </li>
