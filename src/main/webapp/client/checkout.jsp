@@ -10,7 +10,6 @@
 <c:set var="discountAmount" value="${empty sessionScope.discountAmount ? 0 : sessionScope.discountAmount}" />
 <c:set var="finalTotal" value="${subtotal - discountAmount}" />
 
-
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -27,24 +26,24 @@
                     <h3>Thông tin thanh toán</h3>
                     <hr>
                     <form action="${pageContext.request.contextPath}/client/order" method="POST" id="orderForm">
+                        <input type="hidden" name="_csrf" value="${sessionScope.csrfToken}">
 
                         <div class="mb-3">
                             <label class="form-label">Người nhận</label>
-                            <input type="text" class="form-control" value="${sessionScope.account.name}" readonly>
+                            <input type="text" class="form-control" value="<c:out value='${sessionScope.account.name}'/>" readonly>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Email</label>
-                            <input type="email" class="form-control" value="${sessionScope.account.email}" readonly>
+                            <input type="email" class="form-control" value="<c:out value='${sessionScope.account.email}'/>" readonly>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Địa chỉ giao hàng</label>
 
-                            <%-- Lựa chọn 1: Dùng địa chỉ mặc định --%>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="addressOption" id="defaultAddress" value="default" checked onchange="toggleNewAddress()">
                                 <label class="form-check-label" for="defaultAddress">
-                                    Sử dụng địa chỉ mặc định: <strong>${sessionScope.account.address}</strong>
+                                    Sử dụng địa chỉ mặc định: <strong><c:out value="${sessionScope.account.address}"/></strong>
                                 </label>
                             </div>
 
@@ -85,19 +84,20 @@
                             <hr>
 
                             <form action="${pageContext.request.contextPath}/client/apply-coupon" method="POST" class="mb-3">
+                                <input type="hidden" name="_csrf" value="${sessionScope.csrfToken}">
                                 <label class="form-label">Mã giảm giá</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" name="couponCode" placeholder="Nhập mã..." value="${sessionScope.appliedCoupon.code}">
+                                    <input type="text" class="form-control" name="couponCode" placeholder="Nhập mã..." value="<c:out value='${sessionScope.appliedCoupon.code}'/>">
                                     <button class="btn btn-outline-secondary" type="submit">Áp dụng</button>
                                 </div>
                             </form>
 
                             <c:if test="${not empty sessionScope.couponMessage}">
                                 <div class="alert ${sessionScope.couponStatus == 'success' ? 'alert-success' : 'alert-danger'} small p-2" role="alert">
-                                    ${sessionScope.couponMessage}
+                                    <c:out value="${sessionScope.couponMessage}"/>
                                 </div>
                                 <% session.removeAttribute("couponMessage");
-                                    session.removeAttribute("couponStatus");%>
+                                   session.removeAttribute("couponStatus");%>
                             </c:if>
 
                             <hr>
@@ -109,7 +109,7 @@
                                 </li>
                                 <c:if test="${not empty sessionScope.appliedCoupon}">
                                     <li class="list-group-item d-flex justify-content-between text-success">
-                                        <span>Giảm giá (${sessionScope.appliedCoupon.code}):</span>
+                                        <span>Giảm giá (<c:out value="${sessionScope.appliedCoupon.code}"/>):</span>
                                         <span>- <fmt:formatNumber value="${discountAmount}" type="number"/> VND</span>
                                     </li>
                                 </c:if>

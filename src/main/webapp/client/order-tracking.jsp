@@ -3,6 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
+<!DOCTYPE html>
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
@@ -20,7 +21,7 @@
                         <a href="${pageContext.request.contextPath}/client/profile.jsp"><i class="fas fa-user"></i> Tài khoản</a>
                     </nav>
                 </div>
-                <div class="sidebar-footer">© 2025 MyShop</div>
+                <div class="sidebar-footer">© 2026 TechStore</div>
             </aside>
 
             <main class="main-content">
@@ -38,6 +39,7 @@
                         <input type="hidden" name="status" value="${activeTab}">
                         <input type="text" name="keyword" placeholder="Tìm theo tên sản phẩm, địa chỉ, hoặc ID đơn hàng..." value="<c:out value='${param.keyword}'/>">
                     </form>
+
                     <c:choose>
                         <c:when test="${empty orders}">
                             <div class="empty-box">
@@ -49,7 +51,6 @@
                         <c:otherwise>
                             <c:forEach var="order" items="${orders}">
                                 <div class="order-card">
-
                                     <div class="order-header">
                                         <span class="status">
                                             <c:choose>
@@ -67,7 +68,7 @@
                                         <div class="order-body">
                                             <c:choose>
                                                 <c:when test="${not empty item.product.image}">
-                                                    <img src="${item.product.image}" alt="${item.product.name}" 
+                                                    <img src="${item.product.image}" alt="<c:out value='${item.product.name}'/>" 
                                                          style="width:100px;height:100px;object-fit:cover;border-radius:6px;">
                                                 </c:when>
                                                 <c:otherwise>
@@ -77,31 +78,32 @@
                                             </c:choose>
 
                                             <div class="order-info">
-                                                <h3>${item.product.name}</h3>
+                                                <h3><c:out value="${item.product.name}"/></h3>
                                                 <p><strong>Thương hiệu:</strong> <c:out value="${item.product.brand}"/></p>
                                                 <p><strong>Màu:</strong> <c:out value="${item.product.color}"/></p>
                                                 <p><strong>Giá:</strong> <fmt:formatNumber value="${item.product.price}" type="currency" currencySymbol="₫"/></p>
-                                                <p><strong>Số lượng:</strong> <c:out value="${order.paymentMethod}"/></p>
+                                                <p><strong>Số lượng:</strong> <c:out value="${item.quantity}"/></p>
                                             </div>
                                         </div>
                                     </c:forEach>
 
                                     <div class="order-footer">
                                         <div class="footer-left">
-                                            <p><strong>Địa chỉ:</strong> ${order.shippingAddress}</p>
-                                            <p><strong>Thanh toán:</strong> ${order.paymentMethod}</p>
-                                            <p><strong>Ngày đặt:</strong> ${order.dateOrder}</p>
+                                            <p><strong>Địa chỉ:</strong> <c:out value="${order.shippingAddress}"/></p>
+                                            <p><strong>Thanh toán:</strong> <c:out value="${order.paymentMethod}"/></p>
+                                            <p><strong>Ngày đặt:</strong> <c:out value="${order.dateOrder}"/></p>
                                         </div>
                                         <div class="footer-right">
                                             <div class="order-total">
                                                 <strong>Tổng cộng:</strong> <fmt:formatNumber value="${order.getFinalAmount()}" type="currency" currencySymbol="₫"/>
                                             </div>
                                             <div class="order-actions">
-                                                <%-- FIX: Kiểm tra nếu đơn hàng có món thì lấy ID của món đầu tiên để mua lại --%>
                                                 <c:if test="${not empty order.orderItems}">
-                                                    <a href="${pageContext.request.contextPath}/client/buy-now?pid=${order.orderItems[0].product.id}" class="btn-primary">
-                                                        Mua lại
-                                                    </a>
+                                                    <form action="${pageContext.request.contextPath}/client/buy-now" method="post" style="display: inline;">
+                                                        <input type="hidden" name="_csrf" value="${sessionScope.csrfToken}">
+                                                        <input type="hidden" name="pid" value="${order.orderItems[0].product.id}">
+                                                        <button type="submit" class="btn-primary">Mua lại</button>
+                                                    </form>
                                                 </c:if>
                                             </div>
                                         </div>

@@ -30,6 +30,7 @@
             display: inline-flex; align-items: center; justify-content: center; 
             width: 34px; height: 34px; color: white; border-radius: 8px; 
             text-decoration: none; transition: 0.2s; margin-right: 4px;
+            border: none; cursor: pointer;
         }
         .btn-view { background-color: #3b82f6; }
         .btn-edit { background-color: #10b981; }
@@ -82,19 +83,24 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="${pageContext.request.contextPath}/admin/announcements?action=view&id=${a.id}" 
-                                       class="btn-action btn-view" title="Xem chi tiết">
-                                        <i class="fa-solid fa-eye"></i>
-                                    </a>
-                                    <a href="${pageContext.request.contextPath}/admin/announcements?action=editForm&id=${a.id}" 
-                                       class="btn-action btn-edit" title="Chỉnh sửa">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
-                                    <a href="${pageContext.request.contextPath}/admin/announcements?action=delete&id=${a.id}" 
-                                       class="btn-action btn-delete" title="Xóa"
-                                       onclick="return confirm('Xác nhận xóa thông báo này?')">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </a>
+                                    <div style="display: flex;">
+                                        <a href="${pageContext.request.contextPath}/admin/announcements?action=view&id=${a.id}" 
+                                           class="btn-action btn-view" title="Xem chi tiết">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                        <a href="${pageContext.request.contextPath}/admin/announcements?action=editForm&id=${a.id}" 
+                                           class="btn-action btn-edit" title="Chỉnh sửa">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </a>
+                                        <form action="${pageContext.request.contextPath}/admin/announcements" method="post" style="margin: 0;" onsubmit="return confirm('Xác nhận xóa thông báo này?')">
+                                            <input type="hidden" name="_csrf" value="${sessionScope.csrfToken}">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id" value="${a.id}">
+                                            <button type="submit" class="btn-action btn-delete" title="Xóa">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         </c:forEach>

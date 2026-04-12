@@ -45,6 +45,7 @@
             </h2>
 
             <form action="${pageContext.request.contextPath}/admin/announcements" method="post">
+                <input type="hidden" name="_csrf" value="${sessionScope.csrfToken}">
                 <c:choose>
                     <c:when test="${not empty announcements}">
                         <input type="hidden" name="id" value="${announcements.id}">
@@ -74,7 +75,7 @@
 
                 <c:if test="${not empty error}">
                     <div class="error-msg">
-                        <i class="fa-solid fa-circle-exclamation"></i> ${error}
+                        <i class="fa-solid fa-circle-exclamation"></i> <c:out value="${error}"/>
                     </div>
                 </c:if>
 

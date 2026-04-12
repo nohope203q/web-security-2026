@@ -74,6 +74,7 @@
                 <div class="card-body">
                     <h4 class="text-center mb-4"> Quên mật khẩu</h4>
                     <form action="forgotPassword" method="post" class="mb-3">
+                        <input type="hidden" name="_csrf" value="${sessionScope.csrfToken}">
                         <div class="mb-3">
                             <label for="email" class="form-label">Nhập email của bạn:</label>
                             <input type="email" id="email" name="email" placeholder="you@example.com" required>
@@ -81,12 +82,11 @@
                         <button type="submit">Gửi mã OTP</button>
                     </form>
 
-                    <!-- Thông báo lỗi hoặc thành công -->
                     <c:if test="${not empty error}">
-                        <div class="alert alert-danger text-center">${error}</div>
+                        <div class="alert alert-danger text-center"><c:out value="${error}"/></div>
                     </c:if>
                     <c:if test="${not empty message}">
-                        <div class="alert alert-success text-center">${message}</div>
+                        <div class="alert alert-success text-center"><c:out value="${message}"/></div>
                     </c:if>
 
                     <div class="text-center mt-3">
