@@ -1,13 +1,12 @@
 package controllerUser;
 
-import model.LineItem;
-import model.Account;
-import model.User;
-import model.OrderItem;
-import model.Address;
-import model.Product;
-import model.Order;
-import model.Invoice;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
+import data.DBUtil;
+import data.LineItemDAO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.servlet.ServletException;
@@ -16,14 +15,14 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import model.Account;
+import model.Address;
 import model.Coupon;
-import data.DBUtil;
-import data.LineItemDAO;
+import model.Invoice;
+import model.LineItem;
+import model.Order;
+import model.Product;
+import model.User;
 
 @WebServlet("/client/order")
 public class OrderControl extends HttpServlet {
@@ -59,6 +58,10 @@ public class OrderControl extends HttpServlet {
 
         if ("new".equals(addressOption)) {
             finalShippingAddress = request.getParameter("newAddress");
+            if (finalShippingAddress != null) {
+                // Khắc phục XSS (CWE-79)
+                finalShippingAddress = finalShippingAddress.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+            }
             if (finalShippingAddress == null || finalShippingAddress.trim().isEmpty()) {
                 session.setAttribute("checkoutError", "Vui lòng nhập địa chỉ giao hàng mới.");
                 response.sendRedirect(request.getContextPath() + "/client/checkout.jsp");
@@ -84,18 +87,29 @@ public class OrderControl extends HttpServlet {
         Coupon appliedCoupon = (Coupon) session.getAttribute("appliedCoupon");
         BigDecimal discountBigDecimal = (BigDecimal) session.getAttribute("discountAmount");
         double discountAmount = (discountBigDecimal != null) ? discountBigDecimal.doubleValue() : 0.0;
-        double subtotal = 0.0;
-        for (LineItem lineItem : cart) {
-            subtotal += lineItem.getTotal();
-        }
-        double finalAmount = subtotal - discountAmount;
-        if (finalAmount < 0) {
-            finalAmount = 0.0;
-        }
 
-        Order order = new Order();
-        order.setUser((User) account);
-        order.setDateOrder(new Date());
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        EntityTransaction trans = em.getTransaction();
+
+        try {
+            trans.begin();
+
+            double subtotal = 0.0;
+            // Khắc phục Price Freezing (CWE-840): Luôn tải giá mới từ DB
+            for (LineItem lineItem : cart) {
+                Product realProduct = em.find(Product.class, lineItem.getProduct().getId());
+                if (realProduct != null) {
+                    subtotal += realProduct.getPrice() * lineItem.getQuantity();
+                }
+            }
+            double finalAmount = subtotal - discountAmount;
+            if (finalAmount < 0) {
+                throw new RuntimeException("Phát hiện lỗi: Tổng tiền không hợp lệ.");
+            }
+
+            Order order = new Order();
+            order.setUser((User) account);
+            order.setDateOrder(new Date());
         order.setShippingAddress(finalShippingAddress);
         order.setPaymentMethod(paymentMethod);
         order.setStatus(0);
@@ -105,45 +119,38 @@ public class OrderControl extends HttpServlet {
         if (appliedCoupon != null) {
             order.setCouponCode(appliedCoupon.getCode());
         }
+em.persist(order);
 
-        List<OrderItem> orderItems = new ArrayList<>();
         for (LineItem lineItem : cart) {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setProduct(lineItem.getProduct());
-            orderItem.setQuantity(lineItem.getQuantity());
-            orderItem.setOrder(order);
-            orderItems.add(orderItem);
+            // Khắc phục Race Condition (CWE-362)
+            Product product = em.find(Product.class, lineItem.getProduct().getId(), jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+            if (product != null) {
+                int newStock = product.getQuantity() - lineItem.getQuantity();
+                if (newStock < 0) {
+                    throw new RuntimeException("Sản phẩm hết hàng hoặc không đủ số lượng!");
+                }
+                product.setQuantity(newStock);
+                em.merge(product);
+            }
         }
-        order.setOrderItems(orderItems);
 
-        EntityManager em = DBUtil.getEmFactory().createEntityManager();
-        EntityTransaction trans = em.getTransaction();
-
-        try {
-            trans.begin();
-            em.persist(order);
-
-            for (LineItem lineItem : cart) {
-                Product product = em.find(Product.class, lineItem.getProduct().getId());
-                if (product != null) {
-                    int newStock = product.getQuantity() - lineItem.getQuantity();
-                    product.setQuantity(newStock >= 0 ? newStock : 0);
-                    em.merge(product);
+        if (appliedCoupon != null) {
+            // Khắc phục Race Condition & Coupon Bypass (CWE-362 & CWE-285)
+            Coupon couponToUpdate = em.find(Coupon.class, appliedCoupon.getId(), jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+            if (couponToUpdate != null) {
+                if (!"active".equals(couponToUpdate.getStatus()) || 
+                   (couponToUpdate.getUsageLimit() != null && couponToUpdate.getUsedCount() >= couponToUpdate.getUsageLimit())) {
+                    throw new RuntimeException("Mã giảm giá đã hết lượt hoặc không hợp lệ!");
                 }
+                couponToUpdate.setUsedCount(couponToUpdate.getUsedCount() + 1);
+                em.merge(couponToUpdate);
             }
+        }
 
-            if (appliedCoupon != null) {
-                Coupon couponToUpdate = em.find(Coupon.class, appliedCoupon.getId());
-                if (couponToUpdate != null) {
-                    couponToUpdate.setUsedCount(couponToUpdate.getUsedCount() + 1);
-                    em.merge(couponToUpdate);
-                }
-            }
+        Invoice invoice = Invoice.generateFromOrder(order);
+        em.persist(invoice);
 
-            Invoice invoice = Invoice.generateFromOrder(order);
-            em.persist(invoice);
-
-            trans.commit();
+        trans.commit();
 
             LineItemDAO.clearCartForUser((User) account);
 
