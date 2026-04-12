@@ -8,20 +8,19 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/client/css/style-2.css">
     </head>
     <body>
-        <%-- Đổi class thành "container" để đồng bộ --%>
         <div class="container">
             <h2>Đổi mật khẩu</h2>
 
-            <%-- Hiển thị thông báo ở trên cùng để dễ thấy hơn --%>
             <c:if test="${not empty error}">
-                <p class="error">${error}</p>
+                <p class="error"><c:out value="${error}"/></p>
             </c:if>
             <c:if test="${not empty message}">
-                <p class="success">${message}</p>
+                <p class="success"><c:out value="${message}"/></p>
             </c:if>
 
             <form action="${pageContext.request.contextPath}/client/changePassword" method="post">
-                <%-- Bọc mỗi cặp label/input trong một div.form-group --%>
+                <input type="hidden" name="_csrf" value="${sessionScope.csrfToken}">
+                
                 <div class="form-group">
                     <label for="oldPassword">Mật khẩu hiện tại:</label>
                     <input type="password" id="oldPassword" name="oldPassword" required>
@@ -37,7 +36,6 @@
                     <input type="password" id="confirmPassword" name="confirmPassword" required>
                 </div>
 
-                <%-- Nhóm các nút hành động lại --%>
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">Lưu thay đổi</button>
                     <a href="${pageContext.request.contextPath}/client/profile" class="btn-secondary">Hủy</a>
