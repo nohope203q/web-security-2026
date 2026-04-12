@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Random;
 import model.Account;
 import data.EmailUtil;
+import controller.CsrfUtil;
 
 @WebServlet("/client/ChangeProfileServlet")
 public class ChangeProfileServlet extends HttpServlet {
@@ -26,6 +27,10 @@ public class ChangeProfileServlet extends HttpServlet {
             return;
         }
 
+        if (!CsrfUtil.isValidToken(req)) {
+        resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF Token");
+        return;
+        }
         String name = req.getParameter("name");
         String phone = req.getParameter("phone");
         String newEmail = req.getParameter("email");

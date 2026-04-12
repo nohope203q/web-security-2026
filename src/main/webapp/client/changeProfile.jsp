@@ -9,6 +9,7 @@
         <div class="container">
             <h2>Cập nhật thông tin cá nhân</h2>
             <form action="${pageContext.request.contextPath}/client/ChangeProfileServlet" method="post">
+                <input type="hidden" name="_csrf" value="${sessionScope.csrfToken}">
                 <div class="form-group">
                     <label for="name">Họ và tên:</label>
                     <input type="text" id="name" name="name" value="<c:out value='${account.name}'/>" required>
