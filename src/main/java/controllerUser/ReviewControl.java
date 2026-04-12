@@ -25,17 +25,18 @@ public class ReviewControl extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+if (!controller.CsrfUtil.isValidToken(request)) {
+    response.sendError(HttpServletResponse.SC_FORBIDDEN, "CSRF token invalid");
+    return;
+}
         request.setCharacterEncoding("UTF-8");
         HttpSession session = request.getSession();
         Account account = (Account) session.getAttribute("account");
-
         if (account == null || !(account instanceof User)) {
             session.setAttribute("reviewError", "Vui lòng đăng nhập để đánh giá");
             response.sendRedirect(request.getContextPath() + "/client/login.jsp");
             return;
         }
-
         User user = (User) account;
 
         try {

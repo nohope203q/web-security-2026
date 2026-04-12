@@ -331,7 +331,7 @@
                                         <div class="d-flex align-items-center mb-2">
                                             <div class="review-avatar">${rv.user.name.substring(0,1)}</div>
                                             <div class="ms-2">
-                                                <div><strong>${rv.user.name}</strong></div>
+                                               <div><strong><c:out value="${rv.user.name}" /></strong></div>
                                                 <div class="text-warning small">
                                                     <c:forEach begin="1" end="5" var="i">
                                                         <i class="fa-solid fa-star ${i <= rv.rating ? '' : 'text-muted'}"></i>
@@ -342,7 +342,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div>${rv.comment}</div>
+                                <div><c:out value="${rv.comment}" /></div>
                                     </div>
                                 </c:forEach>
 
@@ -360,7 +360,9 @@
                                         <h5 class="mb-3"><i class="fa-solid fa-pen-to-square me-2"></i>Viết đánh giá của bạn</h5>
                                         <form action="${cpath}/review" method="post">
                                             <input type="hidden" name="productId" value="${product.id}">
-                                            <div class="mb-3">
+                                            <div class="mb-3"> 
+                                               <input type="hidden" name="_csrf" value="${sessionScope.csrfToken}">
+
                                                 <label class="form-label fw-semibold">Đánh giá của bạn *</label>
                                                 <style>
                                                     .star-rating {
