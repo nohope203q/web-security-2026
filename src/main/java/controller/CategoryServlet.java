@@ -1,12 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import data.CategoryDAO;
 import model.Category;
 import model.Product;
+import controller.CsrfUtil; 
 import java.io.IOException;
 import java.util.List;
 import jakarta.servlet.ServletException;
@@ -14,20 +11,26 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
-/**
- *
- * @author Admin
- */
 @WebServlet(name = "CategoryServlet", urlPatterns = {"/admin/category"})
 public class CategoryServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        HttpSession session = request.getSession();
+        String csrfToken = (String) session.getAttribute("csrfToken");
+        
+        if (csrfToken == null) {
+            csrfToken = CsrfUtil.generateToken(request);
+        }
+        request.setAttribute("csrfToken", csrfToken);
+
         String action = request.getParameter("action");
         if (action == null) {
-            action = "list"; 
+            action = "list";
         }
 
         String url = "/admin/category.jsp";
@@ -57,6 +60,10 @@ public class CategoryServlet extends HttpServlet {
                 }
             }
             case "delete" -> {
+                if (!CsrfUtil.isValidToken(request)) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
+                    return;
+                }
                 handleDelete(request, response);
                 return;
             }
@@ -71,6 +78,12 @@ public class CategoryServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        if (!CsrfUtil.isValidToken(request)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token (POST)");
+            return;
+        }
+
         String action = request.getParameter("action");
         if (action == null) {
             response.sendRedirect(request.getContextPath() + "/admin/category");
@@ -78,10 +91,8 @@ public class CategoryServlet extends HttpServlet {
         }
 
         switch (action) {
-            case "add" ->
-                handleAdd(request);
-            case "update" ->
-                handleUpdate(request);
+            case "add" -> handleAdd(request);
+            case "update" -> handleUpdate(request);
         }
 
         response.sendRedirect(request.getContextPath() + "/admin/category");
@@ -115,28 +126,23 @@ public class CategoryServlet extends HttpServlet {
             throws IOException {
         try {
             int id = Integer.parseInt(request.getParameter("id"));
-
             List<Product> products = CategoryDAO.getProductsByCategory(id);
 
             if (products == null || products.isEmpty()) {
-
                 CategoryDAO.delete(id);
             } else {
-
                 String message = "Không thể xóa danh mục này vì nó đang chứa sản phẩm.";
-
                 request.getSession().setAttribute("errorMessage", message);
             }
         } catch (NumberFormatException e) {
             System.out.println(e);
             request.getSession().setAttribute("errorMessage", "ID danh mục không hợp lệ.");
         }
-
         response.sendRedirect(request.getContextPath() + "/admin/category");
     }
 
     @Override
     public String getServletInfo() {
-        return "Servlet for managing categories";
+        return "Servlet for managing categories with CSRF protection";
     }
 }

@@ -1,6 +1,7 @@
 <%-- File: header.jsp --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -56,7 +57,7 @@
 
                     <div class="w-50 mx-auto d-none d-lg-block" style="position: relative;">
                         <form action="search" method="get" class="input-group">
-                            <input type="text" name="txt" value="${searchKeyword}" class="form-control" placeholder="Search products...">
+                           <input type="text" name="txt" value="${fn:escapeXml(searchKeyword)}" <input type="text" name="txt" value="${fn:escapeXml(searchKeyword)}" class="form-control" placeholder="Search products...">
                             <button class="btn btn-outline-light" type="submit" data-mdb-ripple-init>
                                 <i class="fas fa-search"></i>
                             </button>

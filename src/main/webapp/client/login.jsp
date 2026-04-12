@@ -19,6 +19,7 @@
 
             <form action="${pageContext.request.contextPath}/client/login" method="post">
                 <%-- Nhóm email --%>
+                  <input type="hidden" name="_csrf" value="${csrfToken}" />
                 <div class="form-group">
                     <label for="email"><i class="fas fa-envelope"></i> Email</label>
                     <input type="email" id="email" name="email" required placeholder="Nhập địa chỉ email của bạn">

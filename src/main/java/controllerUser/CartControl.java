@@ -55,28 +55,31 @@ public class CartControl extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
 
-        request.setCharacterEncoding("UTF-8");
-        HttpSession session = request.getSession();
-        Account account = (Account) session.getAttribute("account");
+    request.setCharacterEncoding("UTF-8");
+    HttpSession session = request.getSession();
+    // KIỂM TRA BẢO MẬT CSRF TRƯỚC TIÊN
+    if (!controller.CsrfUtil.isValidToken(request)) {
+        // Nếu không khớp hoặc không có token, chặn ngay lập tức
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Yêu cầu bị từ chối do thiếu mã xác thực bảo mật (CSRF)!");
+        return;
+    }
+    Account account = (Account) session.getAttribute("account");
+    if (!(account instanceof User)) {
+        session.setAttribute("redirectAfterLogin", request.getRequestURI());
+        response.sendRedirect(request.getContextPath() + "/client/login");
+        return;
+    }
 
-        if (!(account instanceof User)) {
-            session.setAttribute("redirectAfterLogin", request.getRequestURI());
-            response.sendRedirect(request.getContextPath() + "/client/login");
-            return;
-        }
+    User user = (User) account;
+    List<LineItem> cart = LineItemDAO.getCartItemsByUser(user);
 
-        User user = (User) account;
-        List<LineItem> cart = LineItemDAO.getCartItemsByUser(user);
+    String action = request.getParameter("action");
+    if (action == null) { action = "cart"; }
 
-        String action = request.getParameter("action");
-        if (action == null) {
-            action = "cart";
-        }
-
-        handleCartAction(request, action, cart);
+    handleCartAction(request, action, cart);
 
         // CWE-840 / CWE-391: Session State Inconsistency - Xoá dữ liệu mã giảm giá khi giỏ hàng bị thay đổi
         session.removeAttribute("appliedCoupon");

@@ -9,34 +9,65 @@ import java.time.LocalDate;
 import java.util.*;
 import model.Coupon;
 import data.CouponDAO;
+import controller.CsrfUtil; 
 
 @WebServlet("/admin/coupons")
 public class CouponServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        HttpSession session = req.getSession();
+        String csrfToken = (String) session.getAttribute("csrfToken");
+        
+        if (csrfToken == null) {
+            csrfToken = CsrfUtil.generateToken(req);
+        }
+        req.setAttribute("csrfToken", csrfToken);
+
         String action = Optional.ofNullable(req.getParameter("action")).orElse("list");
+        
         switch (action) {
             case "addForm":
                 req.getRequestDispatcher("/admin/coupon_form.jsp").forward(req, resp);
                 return;
+
             case "editForm":
-                int id = Integer.parseInt(req.getParameter("id"));
-                req.setAttribute("coupon", CouponDAO.findById(id));
-                req.getRequestDispatcher("/admin/coupon_form.jsp").forward(req, resp);
+                try {
+                    int id = Integer.parseInt(req.getParameter("id"));
+                    req.setAttribute("coupon", CouponDAO.findById(id));
+                    req.getRequestDispatcher("/admin/coupon_form.jsp").forward(req, resp);
+                } catch (NumberFormatException e) {
+                    resp.sendRedirect(req.getContextPath() + "/admin/coupons");
+                }
                 return;
+
             case "delete":
+                if (!CsrfUtil.isValidToken(req)) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token (Delete)");
+                    return;
+                }
                 CouponDAO.delete(Integer.parseInt(req.getParameter("id")));
                 resp.sendRedirect(req.getContextPath() + "/admin/coupons");
                 return;
+
             case "toggle":
-                Coupon c = CouponDAO.findById(Integer.parseInt(req.getParameter("id")));
-                if (c != null) {
-                    c.setStatus("disabled".equals(c.getStatus()) ? "active" : "disabled");
-                    CouponDAO.update(c);
+                if (!CsrfUtil.isValidToken(req)) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token (Toggle)");
+                    return;
+                }
+                try {
+                    Coupon c = CouponDAO.findById(Integer.parseInt(req.getParameter("id")));
+                    if (c != null) {
+                        c.setStatus("disabled".equals(c.getStatus()) ? "active" : "disabled");
+                        CouponDAO.update(c);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
                 resp.sendRedirect(req.getContextPath() + "/admin/coupons");
                 return;
+
             default:
                 CouponDAO.refreshStatuses();
                 req.setAttribute("coupons", CouponDAO.listAll());
@@ -47,6 +78,12 @@ public class CouponServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         req.setCharacterEncoding("UTF-8");
+
+        if (!CsrfUtil.isValidToken(req)) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token (POST)");
+            return;
+        }
+
         String idStr = req.getParameter("id");
         String code = req.getParameter("code").toUpperCase().replaceAll("\\s+", "");
         String type = req.getParameter("type");
@@ -75,6 +112,7 @@ public class CouponServlet extends HttpServlet {
         }
 
         if (!errs.isEmpty()) {
+            req.setAttribute("csrfToken", CsrfUtil.generateToken(req));
             req.setAttribute("errors", errs);
             req.setAttribute("coupon", build(code, type, value, minOrder, maxDiscount, usageLimit, startDate, endDate, idStr));
             req.getRequestDispatcher("/admin/coupon_form.jsp").forward(req, resp);
@@ -90,6 +128,7 @@ public class CouponServlet extends HttpServlet {
         coupon.setUsageLimit(usageLimit);
         coupon.setStartDate(startDate);
         coupon.setEndDate(endDate);
+        
         if (coupon.getId() == null) {
             CouponDAO.insert(coupon);
         } else {
